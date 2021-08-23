@@ -1,0 +1,58 @@
+library(formula.tools)
+library(mlr3verse)
+library(tidyverse)
+
+# Create an S3 object called dgp
+
+# Constructor
+new_dgp <- function(
+  formulas = list(
+    y ~ b0 + theta * d + x %*% b + e,
+    d ~ m(x) + u
+  ),
+  args = list(
+    b0 = 1.5,
+    theta = 0.75,
+    x = list(MASS::mvrnorm, mu = rnorm(2), Sigma = diag(runif(2, 1, 4))),
+    b = list(runif, n = 2),
+    e = list(rnorm, sd = 4),
+    m = function(x) 
+  ),
+  simulation = list(seed = 1, N = 1000)
+){
+  
+  list_dgp <- list(
+    formulas = formulas,
+    simulation = simulation,
+    data = list()
+  )
+  
+  # Allow for setting attributes already
+  
+  structure(list_dgp, class = "dgp")
+}
+
+# Validator checks the validity of the constructors arguments
+validate_dgp <- function(x){
+  
+  # Check that all supplied formulas are in fact formulas
+  
+  # Check that 
+}
+
+# Helper function to construct class
+
+
+# Then build methods
+
+
+# Add Level function. Need to add formula and args.
+
+
+# Get/Set formula
+
+# Get/Set Args
+
+# Simulate
+
+# Get/Set Simulation
