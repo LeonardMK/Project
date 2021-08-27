@@ -554,15 +554,116 @@ cov_prob <- function(x, ...){
 # Just repeat cov_prob. Need to add the specifications.
 # Specifications are not stored inside the estimator function. 
 # Have to supply them manually.
-cov_prob.mcs <- function(mcs_obj, parameter_names, level = 0.95){
+cov_prob.mcs <- function(mcs_obj, parameter_names = "theta", alpha = c(0.1, 0.05, 0.01), 
+                         N = NULL, Samples = NULL, plot = TRUE, na.rm = TRUE, by = NULL){
   
-  # Use confint.mcs to get confidence bands  
-  df_results <- confint(mcs_obj, level = level)
+  df_results <- get_estimates(mcs_obj)
+  vec_N <- N
+  
+  # Check if results are present
+  if (!all(N %in% df_results$N)) {
+    stop("Sample sizes provided through 'N' are not present in this simulation", call. = FALSE)
+  }
+  
+  if (!all(Samples %in% df_results$Sample)) {
+    stop("Sample indices provided through 'Samples' have to be present in this simulation.", call. = FALSE)
+  }
+  
+  if (is.null(N)) vec_N <- df_results$N %>% unique()
+  
+  if (is.null(Samples)) Samples <- df_results$Sample %>% unique()
+  
+  by <- syms(by)
   
   # Get true parameter value
-  vec_parameter <- get_parameter()
+  # If parameter is a single parameter simply add a column.
+  # Otherwise the vector is simply recycled.
+  df_results$parameter <- get_parameter(mcs_obj, parameter_names)
+  df_results$parameter_names <- str_to_title(parameter_names)
   
-  df_results$parameter <- vec_parameter
+  # Create dataframe of critical values
+  df_results <- matrix(vec_alpha, nrow(df_results), length(vec_alpha), byrow = TRUE) %>% 
+    as.data.frame() %>% 
+    set_names(vec_alpha) %>% 
+    cbind(df_results) %>% 
+    mutate(
+      across(
+        as.character(vec_alpha), 
+        ~ if_else(is.na(df), qnorm(1 - .x / 2), qt(1 - .x / 2, df))
+        )
+    )
+  
+  # Create empty matrix of lower and upper
+  df_lower <- df_results$parameter_est - df_results$sd * df_results[, as.character(vec_alpha)]
+  df_upper <- df_results$parameter_est + df_results$sd * df_results[, as.character(vec_alpha)]
+  df_theta_in <- (df_results$parameter > df_lower) & (df_results$parameter < df_upper) %>% 
+    as.data.frame() %>% 
+    set_names(paste0("theta_in_", 100 * (1 - vec_alpha), "%_ci"))
+  df_width_ci <- (df_upper - df_lower) %>% 
+    set_names(paste0("width_", 100 * (1 - vec_alpha), "%_ci"))
+  df_cov_prob <- cbind.data.frame(
+    df_results %>% select(!!!by, N),
+    df_theta_in,
+    df_width_ci
+  ) %>% 
+    group_by(N, !!!by) %>% 
+    summarise(
+      across(starts_with("theta_in_"), ~ mean(.x, na.rm = na.rm)),
+      across(starts_with("width_"), ~ mean(.x, na.rm = na.rm))
+    ) %>% 
+    rename_with(
+      ~ paste0("Prob. Theta in ", 100 * (1 - vec_alpha), "% CI"), 
+      starts_with("theta_in_")
+      ) %>% 
+    rename_with(
+      ~ paste0("Width of ", 100 * (1 - vec_alpha), "% CI"),
+      starts_with("width_")
+      )
+  
+  # Need df_cov_prob in long format.
+  # Create two intermediate dataframes
+  df_cov_prob_1 <- df_cov_prob %>% 
+    pivot_longer(
+      cols = starts_with("Prob. Theta in"), 
+      names_to = "Type of CI", 
+      values_to = "Cov. Prob."
+      )
+  
+  df_cov_prob_2 <- df_cov_prob %>% 
+    pivot_longer(
+      cols = starts_with("Width of "), 
+      names_to = "Type of CI", 
+      values_to = "Width of CI"
+      )
+  
+  df_cov_prob <- cbind(
+    df_cov_prob_1 %>% select(!matches("^Width of ..% CI")),
+    `Width of CI` = df_cov_prob_2 %>% pull("Width of CI")
+  ) %>% 
+    mutate(
+      `Type of CI` = str_remove(`Type of CI`, "Prob\\. Theta in "),
+      `Cov. Prob.` = round(100 * `Cov. Prob.`),
+      N = as.factor(N)
+      )
+  
+  if (plot) {
+    
+    cov_prob_plot <- ggplot(
+      data = df_cov_prob, 
+      mapping = aes(x = N, y = `Cov. Prob.`, size = `Width of CI`, col = eval(by[[1]]))) + 
+      geom_point(alpha = 0.3) + 
+      labs(y = "Coverage Probability", x = "Sample Size", col = str_to_title(as.character(by[[1]]))) + 
+      facet_wrap(~ `Type of CI`) + 
+      theme_bw() + 
+      scale_y_continuous(breaks = seq(0, 100, 5))
+    
+    list(data = df_cov_prob, plot = cov_prob_plot)
+    
+  } else {
+    
+    list(data = df_cov_prob)
+    
+  }
   
 }
 

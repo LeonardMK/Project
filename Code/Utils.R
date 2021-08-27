@@ -112,7 +112,7 @@ calc_err_exact <- function(mcs_obj){
   
 }
 
-calc_err_estimate <- function(mcs_obj, function_names = c("g", "m"), categorial = c(FALSE, TRUE)){
+calc_err_estimate <- function(mcs_obj, function_names = c("g", "m"), categorial = c(FALSE, TRUE), na.rm = TRUE){
   
   # Get functions into the environment as a named list
   list_functions <- mcs_obj$dgp$arguments[function_names] %>% 
@@ -120,6 +120,8 @@ calc_err_estimate <- function(mcs_obj, function_names = c("g", "m"), categorial 
       rlang::get_expr(.x) %>% 
         rlang::eval_tidy()
     })
+  
+  vec_names_fun <- list_functions %>% names()
   
   # Get arguments into vector
   list_names_args <- list_functions %>% 
@@ -147,8 +149,12 @@ calc_err_estimate <- function(mcs_obj, function_names = c("g", "m"), categorial 
       
     })
   
+  # Get N and Sample for identification
+  vec_N <- mcs_obj$dgp$datasets %>% map_dbl(~ .x$N)
+  vec_Sample <- mcs_obj$dgp$datasets %>% map_dbl(~ .x$Sample)
+  
   # Calculate for every dataset the difference between g(x), m(x) and the prediction
-  list_true <- mcs_obj$dgp$datasets %>% 
+  df_true <- mcs_obj$dgp$datasets %>% 
     map(function(datasets){
       
       # Get predictions into list format
@@ -156,7 +162,8 @@ calc_err_estimate <- function(mcs_obj, function_names = c("g", "m"), categorial 
         names() %>% 
         str_which(pattern = paste0("Sample = ", datasets$Sample, " with N = ", datasets$N))
       
-      list_true_dataset <- map(function_names, function(fun){
+      map(function_names, function(fun){
+        # browser()
         # Create a named list containing data and args
         list_fun_args <- list_args[[fun]]$data %>% 
           map(~{
@@ -175,62 +182,72 @@ calc_err_estimate <- function(mcs_obj, function_names = c("g", "m"), categorial 
         list_fun_args <- list_fun_args[formals(list_functions[[fun]]) %>% names()]  
         
         # Execute
-        fun_hat <- mcs_obj$results[[ind_results]]$Output$Predictions[[fun]]
         fun_0 <- exec(
           list_functions[[fun]],
           !!!list_fun_args
-        )
+        ) %>% as.data.frame()
         
-        mat_true <- cbind(fun_0, fun_hat)
+        if (fun == vec_names_fun[categorial]) fun_0 <- fun_0 %>% select(matches("^Prob_.*$"))
         
-        colnames(mat_true) <- paste0(fun, "_", colnames(mat_true))
+        # Get function estimator names
+        vec_names_estimators <- mcs_obj$results[[ind_results]]$Output$Settings %>% 
+          map_chr(~ {
+            .x$Learner %>% pluck(paste0("ml_", fun)) %>% pluck("id")
+          })
         
-        mat_true
+        vec_est_count <- table(vec_names_estimators)
         
-      })
+        # Has multiple predictions for differing learners and repeated CV
+        mcs_obj$results[[ind_results]]$Output$Predictions %>% 
+          map(~ {
+            
+            # browser()
+            # Get predictions
+            fun_hat <- .x[[fun]] %>% as.vector()
+            
+            df_diff <- (fun_0 - fun_hat)
+            
+            # Calculate MSE, Bias and variance
+            dbl_mse <- colMeans(df_diff ^ 2, na.rm = na.rm)
+            dbl_bias <- colMeans(df_diff, na.rm = na.rm)
+            dbl_variance <- var(fun_hat)
+            
+            df_msrs <- data.frame(
+              MSE = dbl_mse, 
+              Bias = dbl_bias, 
+              Variance = dbl_variance
+              )
+            
+          }) %>% 
+          map_df(~ .x) %>% 
+          mutate(
+            N = vec_N[ind_results],
+            Sample = vec_Sample[ind_results],
+            Estimator = vec_names_estimators,
+            Fun = fun,
+            Best = case_when(
+              MSE == min(MSE, na.rm = na.rm) ~ TRUE,
+              TRUE ~ FALSE
+            )
+          ) %>% 
+          unique()
+        
+      }) %>% 
+        map_df(~ .x)
       
-      df_true_dataset <- do.call(cbind.data.frame, list_true_dataset)
-      df_true_dataset$N <- datasets$N
-      df_true_dataset$Sample <- datasets$Sample
-      
-      df_true_dataset
-      
-    })
+    }) %>% 
+    map_df(~ .x)
   
-  df_true <- list_true %>% map_dfr(~.x)
+  # Group results by N, Estimator and function.
+  df_msrs_aggregate <- df_true %>% 
+    group_by(N, Fun, Estimator) %>% 
+    summarise(
+      MSE = mean(MSE, na.rm = na.rm),
+      Bias = mean(Bias, na.rm = na.rm),
+      Variance = mean(Variance, na.rm = na.rm)
+    )
   
-  # For every function calculate the difference between predicted and true
-  list_diff <- function_names %>% 
-    map(function(fun){
-      
-      if(categorial[which(function_names == fun)]){
-        
-        df_fun_0 <- df_true %>% 
-          select(starts_with(fun) & matches("prob"))
-        df_fun_hat <- df_true %>% 
-          select(starts_with(fun) & ends_with("hat"))
-        abs(df_fun_0 - df_fun_hat)
-        
-      }else{
-        
-        df_fun_0 <- df_true %>% 
-          select(starts_with(fun) & ends_with("0"))
-        df_fun_hat <- df_true %>% 
-          select(starts_with(fun) & ends_with("hat"))
-        abs(df_fun_0 - df_fun_hat)
-      }
-      
-    })
-  # browser()
-  df_diff <- do.call(cbind, list_diff)
-  colnames(df_diff) <- paste0("diff_", colnames(df_diff))
-  df_total <- cbind(df_true, df_diff)
-  psych::describeBy(df_total %>% select(starts_with("diff_")), group = df_total$N, mat = TRUE) %>% 
-    as.data.frame() %>% 
-    select(group1, min, mean, median, max) %>% 
-    rename(N = group1) %>% 
-    rownames_to_column(var = "fun") %>% 
-    mutate(fun = str_extract(fun, "(?<=_).*(?=_[fun|Prob])"))
+  list(aggregated = df_msrs_aggregate, raw = df_true)
   
 }
 

@@ -80,6 +80,20 @@ list_kknn <- list(
   )
 )
 
+# SIngle layer Neural Network
+list_nnet <- list(
+  ml_g = ps(
+    size = p_int(lower = 1, upper = 20),
+    decay = p_dbl(lower = 0, upper = 200),
+    maxit = p_int(lower = 500, upper = 10000)
+  ),
+  ml_m =  ps(
+    size = p_int(lower = 1, upper = 20),
+    decay = p_dbl(lower = 0, upper = 200),
+    maxit = p_int(lower = 500, upper = 10000)
+  )
+)
+
 # Create a single list
 list_parameterspace <- list(
   glmnet = list_glmnet,
@@ -87,7 +101,8 @@ list_parameterspace <- list(
   ranger = list_ranger,
   rpart = list_rpart,
   # svm = list_svm,
-  kknn = list_kknn
+  kknn = list_kknn,
+  nnet = list_nnet
 )
 
 # In case no tuning is performed and only default values are used, design points are needed
@@ -97,5 +112,6 @@ list_design_points <- list(
   ranger = data.table(mtry = 1, num.trees = 500),
   rpart = data.table(cp = 0.01),
   # svm = data.table(kernel = "radial", epsilon = 0.1),
-  kknn = data.table(k = 7, distance = 2, kernel = "optimal")
+  kknn = data.table(k = 7, distance = 2, kernel = "optimal"),
+  nnet = data.table(size = 3, decay = 0, maxit = 1000)
 )

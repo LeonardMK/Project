@@ -73,7 +73,7 @@ list_tune_settings <- list(
 vec_ml_g <- c("regr.glmnet", "regr.xgboost", "regr.ranger", "regr.rpart", "regr.kknn")
 vec_ml_m <- c("classif.glmnet", "classif.xgboost", "classif.ranger", "classif.rpart", "classif.kknn")
 
-test_dataset <- test$datasets$`Sample = 10 with N = 250`$data
+test_dataset <- test$datasets$`Sample = 10 with N = 200`$data
 x <- dml_estimator(dataset = test_dataset, x_cols = paste0("X.", 1:2), y_col = "Y", d_cols = "D", 
               ml_g = vec_ml_g, 
               ml_m = vec_ml_m, 
@@ -100,11 +100,11 @@ mcs_test <- run_simulation(
 
 df_estimates <- get_estimates(mcs_test)
 
-df_mse <- mse(mcs_test, by = "min_pred_err")
-mse(mcs_test, N = 100, Samples = 1:10, na.rm = TRUE, by = "min_pred_err")
+df_mse <- mse(mcs_test, by = "algorithms")
+mse(mcs_test, N = 100, Samples = 1:10, na.rm = TRUE, by = "algorithms")
 
-consistency(mcs_test, by = "min_pred_err")
-asymptotic_normal(mcs_test, by = "min_pred_err")
-distribution(mcs_test, by = "min_pred_err")
+consistency(mcs_test, by = "algorithms")
+asymptotic_normal(mcs_test, by = "algorithms")
+distribution(mcs_test, by = "algorithms")
 calc_err_estimate(mcs_test)
-cov_prob(mcs_test)
+cov_prob(mcs_test, by = "algorithms")
