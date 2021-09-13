@@ -1,0 +1,4 @@
+Sys.setenv("GCE_AUTH_FILE" = "gcp_key.json")
+
+library(googleComputeEngineR)
+gce_get_project()

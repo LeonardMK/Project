@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "precise-crowbar-316209",
+  "private_key_id": "729dc0faea3407819547e43c34722165b6754935",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCjG68IaWUW+czH\nYrywoZJu4qLYhkJKoB5bWwKZU+gbuqpjPE2SUiUJiDGVAbcJrYha2ghaLXGPVQZ2\nbWNqlGcBJ4dc5Ko4A7oRtGwuUw3qKZ+CRBB3EzGRUrf5V6QKLL6IAOxlhDsn3O22\nLpwSudDMLwB10BW/+DcNIU6RB2ZPOmMPXcLJk9vQMO0Ec16vNQEZAFsKk/dP4flM\nHmzqZqBW2/+vrAHTO6fTpQgIHOihIkpjOrQ3ivQx4zsw0Pyj3f2jQKEUnUz91xVU\niyixnm5fSjPEU6Xiiiavzn5Mw5fX3j0hR/bxiZjD+1lFXoCVE2G8Yi0ipXm27GFB\n3HOAt8W3AgMBAAECggEAT9Jl+8dcbfyMv0zuS8CegX6PNEisG4o1oP6ujGvYLO3S\noeLqkX962anZnfLraSSQFOob6UnRB9ST55QL8aYzrIh0Qb00IlqMjkqOILOLnTuG\ncMEvj56IhPaGy1MdF8+i5LsS9XFbY9xGRwCTZ8SgzrP31TAi3MIz6syQfwAwjPec\nSXagPdpDn9NHxxxunK9DyMU0eN2IdYVtNpFrwr8Geyebx2GnvoCyrQ0WNLcTrS6t\nU6BzY/PW7Hg7uhOGtuxInpuLci6wgFIwPXmlvqQhlcYuSzDh1Y9lBQKVEJwmpggX\na9DkOloI5oeyBGHWwTEDSs68Kf+/j3WfOM8acvXyqQKBgQDjaasqotzub04aWh4u\nHQKlI9zjm32nqbOyMwtqa6kxe36/41q6axMZiCKgO6B+CLjvlelSOkC+A+nQ9X4z\n4f4rXEGKp4Ze1AMWcO7q+b8vqaUC9wEI8vu7ZmhA9GwwIZhQMZJXZQp3LJ5og/Tk\nknSB4+eUpxr4/ZXyM/KHDJqtmQKBgQC3nKOL+p5QsVcrpQbw9EuiWpKkBjuQav/w\n2nePLtjA2YUMLdxsNMuVxaN7ADfxw1bmgtUarP50zaCXNA/SU/qzPZKNlhqDQvIY\nUG7DKmTBtJ0Ncnmh5qaSXOoShUQTKX+ICab1yZiYcw9+22D84/fI+5xvaOZj4jcu\n42ZEksr/zwKBgQDWxKOvN3IZCCslvfgEqscluLHSjrVj02PupkBgt95o6e1xQUEd\nDyRRl3zEAKv4ezpUoipgyrz79uwpuL8ANqz4vD71uHKxOd7UocExTr3dQISjQSzM\nC9XrTLKmrW9DIWccTUScnsL8e7n6kKyF9T5ssRSzEgHqJmsm+yJPonqt+QKBgHDe\nCvLbJkJ4IRulIDUyFuRARPArHKZT/+ywfto3c+poTA8Gif7CHXt9uFa99aXZ7Cta\ntWDmgqyOUm9gA3HJScywxsveP4H8vxEPMGcsQi+ItRo1Cmvpeu9xyjmETipxUgHv\n3QAt4m2kHRxgAqiyAfk8IheiJi20OzPJeW4hxkOlAoGBAJN/9MyZIlSh45H+smNk\nZTcw77hWDIMpbS0awDP2Fk44B8OZ3bjag+SDbAqCkPuwVDK3JlnJVtogQP3nGQym\n6fShcuiJ1NFr8lOLLj7ONVxaiOF6EWXapO9lnl/gVOZ8yqQfJnC7QbFGykq4ym4I\nGr6VrRy7Ba/LZMzg4/bF3rTR\n-----END PRIVATE KEY-----\n",
+  "client_email": "master-thesis-project@precise-crowbar-316209.iam.gserviceaccount.com",
+  "client_id": "102064473110426440195",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/master-thesis-project%40precise-crowbar-316209.iam.gserviceaccount.com"
+}

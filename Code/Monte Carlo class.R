@@ -74,43 +74,31 @@ print.mcs <- function(mcs_obj){
 }
 
 # Run MCS function. Allows for parallel execution
-run_simulation.mcs <- function(mcs_obj, seed, samples, N, parallel = FALSE, workers, ...){
-  
+run_simulation.mcs <- function(mcs_obj, seed, samples = NULL, N = NULL, 
+                               parallel = FALSE, workers = 1, globals = TRUE, ...){
+  list_design_points <- list_design_points
+  dml_mean <- dml_mean
   # Create datasets if not already present
   if (length(mcs_obj$dgp$datasets) == 0) {
     mcs_obj$dgp <- mcs_obj$dgp %>% run_simulation(seed, samples, N)
   }
   
-  if (parallel) {
+  plan(multisession, workers = workers)
+  
+  list_estimates <- future_map(mcs_obj$dgp$datasets, function(dataset){
     
-    plan(multisession, workers = workers)
-    
-    list_estimates <- future_map(mcs_obj$dgp$datasets, function(dataset){
-      
-      list(
-        Output = mcs_obj$estimator(dataset$data, ...), 
-        N = dataset$N, 
-        Sample = dataset$Sample
-        )
-      }, 
-      .options = furrr_options(
-        packages = sessionInfo() %>% pluck("otherPkgs") %>% names(), 
-        seed = seed
-        ),
-      .progress = TRUE)
-    
-  } else {
-    
-    set.seed(seed)
-    list_estimates <- map(mcs_obj$dgp$datasets, function(dataset){
-      
-      list(
-        Output = mcs_obj$estimator(dataset$data, ...), 
-        N = dataset$N, 
-        Sample = dataset$Sample)
-      })
-    
-  }
+    list(
+      Output = mcs_obj$estimator(dataset$data, ...), 
+      N = dataset$N, 
+      Sample = dataset$Sample
+    )
+  }, 
+  .options = furrr_options(
+    globals = globals,
+    packages = sessionInfo() %>% pluck("otherPkgs") %>% names(), 
+    seed = seed
+  ),
+  .progress = TRUE)
   
   # Keep estimates in whatever form. This allows for more flexibility
   names(list_estimates) <- mcs_obj$dgp$datasets %>% names()

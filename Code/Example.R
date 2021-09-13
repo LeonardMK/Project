@@ -55,29 +55,29 @@ test %>% get_formulas()
 test %>% get_arguments()
 # test <- test %>% set_arguments(gamma = runif(10, -2, 2))
 
-test <- test %>% run_simulation(N = c(100, 200, 400), seed = 2, samples = 30)
+test <- test %>% run_simulation(N = c(100), seed = 2, samples = 30)
 
 # Example Estimator evaluation
 list_tune_settings <- list(
   terminator = trm("combo", 
                    list(
-                     trm("evals", n_evals = 10), 
+                     trm("evals", n_evals = 30), 
                      trm("stagnation", iters = 5)
                    )
   ),
   algorithm = tnr("random_search"),
   rsmp_tune = rsmp("cv", folds = 5),
-  measure = list(ml_g = "regr.mse", ml_m = "classif.logloss")
+  measure = list(ml_g = msr("regr.mse"), ml_m = msr("classif.logloss"))
 )
 
 vec_ml_g <- c("regr.glmnet", "regr.xgboost", "regr.ranger", "regr.rpart", "regr.kknn")
 vec_ml_m <- c("classif.glmnet", "classif.xgboost", "classif.ranger", "classif.rpart", "classif.kknn")
 
-test_dataset <- test$datasets$`Sample = 10 with N = 200`$data
+test_dataset <- test$datasets$`Sample = 10 with N = 100`$data
 x <- dml_estimator(dataset = test_dataset, x_cols = paste0("X.", 1:2), y_col = "Y", d_cols = "D", 
               ml_g = vec_ml_g, 
               ml_m = vec_ml_m, 
-              draw_sample_splitting = FALSE, tune = TRUE, 
+              draw_sample_splitting = FALSE, tune = FALSE, 
               tune_settings = list_tune_settings,
               par_grids = list_parameterspace
 )
@@ -89,13 +89,14 @@ print(mcs_test)
 
 # Run on a single core first
 mcs_test <- run_simulation(
-  mcs_test, seed = 2, parallel = TRUE, workers = 3,
+  mcs_test, seed = 2, parallel = TRUE, workers = 2,
   x_cols = paste0("X.", 1:2), y_col = "Y", d_cols = "D", 
   ml_g = vec_ml_g, 
   ml_m = vec_ml_m, 
-  draw_sample_splitting = FALSE, tune = TRUE, 
+  draw_sample_splitting = FALSE, tune = FALSE, 
   tune_settings = list_tune_settings,
-  par_grids = list_parameterspace
+  par_grids = list_parameterspace, 
+  globals = TRUE
 )
 
 df_estimates <- get_estimates(mcs_test)
@@ -106,5 +107,4 @@ mse(mcs_test, N = 100, Samples = 1:10, na.rm = TRUE, by = "algorithms")
 consistency(mcs_test, by = "algorithms")
 asymptotic_normal(mcs_test, by = "algorithms")
 distribution(mcs_test, by = "algorithms")
-calc_err_estimate(mcs_test)
 cov_prob(mcs_test, by = "algorithms")

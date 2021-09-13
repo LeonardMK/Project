@@ -1,3 +1,4 @@
+library(data.table)
 library(mlr3verse)
 library(paradox)
 library(tidyverse)
@@ -50,22 +51,6 @@ list_rpart <- list(
   )
 )
 
-# Support Vector Machines 
-# Scales inputs automatically. Epsilon between 0 and 2 is therefore reasonable
-list_svm <- list(
-  ml_g = ps(
-    cost = p_dbl(lower = 0.0001, upper = 10000),
-    kernel = p_fct(levels = c("polynomial", "radial", "sigmoid")),
-    gamma = p_dbl(lower = 0, upper = 10),
-    epsilon = p_dbl(lower = 0.01, upper = 1)
-  ),
-  ml_m = ps(
-    cost = p_dbl(lower = 0.0001, upper = 10000),
-    kernel = p_fct(levels = c("polynomial", "radial", "sigmoid")),
-    gamma = p_dbl(lower = 0, upper = 10)
-  )
-)
-
 # Add also kknn as a the most flexible variant
 list_kknn <- list(
   ml_g = ps(
@@ -84,12 +69,12 @@ list_kknn <- list(
 list_nnet <- list(
   ml_g = ps(
     size = p_int(lower = 1, upper = 20),
-    decay = p_dbl(lower = 0, upper = 200),
+    decay = p_dbl(lower = 1, upper = exp(0.1), logscale = TRUE),
     maxit = p_int(lower = 500, upper = 10000)
   ),
   ml_m =  ps(
     size = p_int(lower = 1, upper = 20),
-    decay = p_dbl(lower = 0, upper = 200),
+    decay = p_dbl(lower = 1, upper = exp(0.1), logscale = TRUE),
     maxit = p_int(lower = 500, upper = 10000)
   )
 )

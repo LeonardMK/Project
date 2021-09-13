@@ -559,7 +559,7 @@ cov_prob.mcs <- function(mcs_obj, parameter_names = "theta", alpha = c(0.1, 0.05
   
   df_results <- get_estimates(mcs_obj)
   vec_N <- N
-  
+
   # Check if results are present
   if (!all(N %in% df_results$N)) {
     stop("Sample sizes provided through 'N' are not present in this simulation", call. = FALSE)
@@ -582,25 +582,25 @@ cov_prob.mcs <- function(mcs_obj, parameter_names = "theta", alpha = c(0.1, 0.05
   df_results$parameter_names <- str_to_title(parameter_names)
   
   # Create dataframe of critical values
-  df_results <- matrix(vec_alpha, nrow(df_results), length(vec_alpha), byrow = TRUE) %>% 
+  df_results <- matrix(alpha, nrow(df_results), length(alpha), byrow = TRUE) %>% 
     as.data.frame() %>% 
-    set_names(vec_alpha) %>% 
+    set_names(alpha) %>% 
     cbind(df_results) %>% 
     mutate(
       across(
-        as.character(vec_alpha), 
+        as.character(alpha), 
         ~ if_else(is.na(df), qnorm(1 - .x / 2), qt(1 - .x / 2, df))
         )
     )
   
   # Create empty matrix of lower and upper
-  df_lower <- df_results$parameter_est - df_results$sd * df_results[, as.character(vec_alpha)]
-  df_upper <- df_results$parameter_est + df_results$sd * df_results[, as.character(vec_alpha)]
+  df_lower <- df_results$parameter_est - df_results$sd * df_results[, as.character(alpha)]
+  df_upper <- df_results$parameter_est + df_results$sd * df_results[, as.character(alpha)]
   df_theta_in <- (df_results$parameter > df_lower) & (df_results$parameter < df_upper) %>% 
     as.data.frame() %>% 
-    set_names(paste0("theta_in_", 100 * (1 - vec_alpha), "%_ci"))
+    set_names(paste0("theta_in_", 100 * (1 - alpha), "%_ci"))
   df_width_ci <- (df_upper - df_lower) %>% 
-    set_names(paste0("width_", 100 * (1 - vec_alpha), "%_ci"))
+    set_names(paste0("width_", 100 * (1 - alpha), "%_ci"))
   df_cov_prob <- cbind.data.frame(
     df_results %>% select(!!!by, N),
     df_theta_in,
@@ -612,11 +612,11 @@ cov_prob.mcs <- function(mcs_obj, parameter_names = "theta", alpha = c(0.1, 0.05
       across(starts_with("width_"), ~ mean(.x, na.rm = na.rm))
     ) %>% 
     rename_with(
-      ~ paste0("Prob. Theta in ", 100 * (1 - vec_alpha), "% CI"), 
+      ~ paste0("Prob. Theta in ", 100 * (1 - alpha), "% CI"), 
       starts_with("theta_in_")
       ) %>% 
     rename_with(
-      ~ paste0("Width of ", 100 * (1 - vec_alpha), "% CI"),
+      ~ paste0("Width of ", 100 * (1 - alpha), "% CI"),
       starts_with("width_")
       )
   
@@ -642,20 +642,30 @@ cov_prob.mcs <- function(mcs_obj, parameter_names = "theta", alpha = c(0.1, 0.05
   ) %>% 
     mutate(
       `Type of CI` = str_remove(`Type of CI`, "Prob\\. Theta in "),
+      `Lower 95%` = 100 * (`Cov. Prob.` + qnorm(0.025) * sqrt(`Cov. Prob.` * (1 - `Cov. Prob.`) / N)),
+      `Upper 95%` = 100 * (`Cov. Prob.` + qnorm(0.975) * sqrt(`Cov. Prob.` * (1 - `Cov. Prob.`) / N)),
       `Cov. Prob.` = round(100 * `Cov. Prob.`),
       N = as.factor(N)
+      ) %>% 
+    mutate(
+      `Upper 95%` = case_when(
+        `Upper 95%` > 100 ~ 100,
+        TRUE ~ `Upper 95%`
       )
+    )
   
   if (plot) {
     
     cov_prob_plot <- ggplot(
       data = df_cov_prob, 
-      mapping = aes(x = N, y = `Cov. Prob.`, size = `Width of CI`, col = eval(by[[1]]))) + 
+      mapping = aes(x = N, y = `Cov. Prob.`, col = `Width of CI`, shape = eval(by[[1]]))) + 
       geom_point(alpha = 0.3) + 
-      labs(y = "Coverage Probability", x = "Sample Size", col = str_to_title(as.character(by[[1]]))) + 
-      facet_wrap(~ `Type of CI`) + 
+      geom_errorbar(aes(ymin = `Lower 95%`, ymax = `Upper 95%`)) + 
+      geom_hline(aes(yintercept = as.numeric(str_remove(`Type of CI`, "% CI$"))), linetype = "dashed") + 
+      labs(y = "Coverage Probability", x = "Sample Size", shape = str_to_title(as.character(by[[1]]))) + 
+      facet_grid(eval(by[[1]]) ~ `Type of CI`) + 
       theme_bw() + 
-      scale_y_continuous(breaks = seq(0, 100, 5))
+      scale_color_continuous(type = "viridis")
     
     list(data = df_cov_prob, plot = cov_prob_plot)
     

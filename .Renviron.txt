@@ -1,0 +1,3 @@
+GCE_AUTH_FILE="/Users/Wilms/OneDrive - uni-bonn.de/Uni Bonn/6. Semester/Masterarbeit/Project/gce_key.json"
+GCE_DEFAULT_PROJECT_ID="precise-crowbar-316209"
+GCE_DEFAULT_ZONE="europe-west1-b"
