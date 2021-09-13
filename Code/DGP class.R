@@ -3,8 +3,6 @@ library(magrittr)
 library(mlr3verse)
 library(tidyverse)
 
-setwd("C:/Users/Wilms/OneDrive - uni-bonn.de/Uni Bonn/6. Semester/Masterarbeit/Project/")
-
 source("Code/Utils.R")
 
 # Create an S3 object called dgp

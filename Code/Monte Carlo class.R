@@ -1,8 +1,6 @@
 library(furrr)
 library(tidyverse)
 
-setwd("C:/Users/Wilms/OneDrive - uni-bonn.de/Uni Bonn/6. Semester/Masterarbeit/Project/")
-
 source("Code/DGP class.R")
 source("Code/Utils.R")
 

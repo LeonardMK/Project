@@ -2,8 +2,6 @@ library(DoubleML)
 library(mlr3verse)
 library(tidyverse)
 
-setwd("C:/Users/Wilms/OneDrive - uni-bonn.de/Uni Bonn/6. Semester/Masterarbeit/Project/")
-
 source("Code/DGP class.R")
 source("Code/Definition Parameter Space.R")
 source("Code/Estimator Functions.R")
