@@ -129,7 +129,7 @@ dml_estimator <- function(
                estimators need to have the same parameterspace.", call. = FALSE)
       }
       
-      source("C:/Users/Wilms/OneDrive - uni-bonn.de/Uni Bonn/6. Semester/Masterarbeit/Project/Code/Definition Parameter Space.R")
+      source("/Code/Definition Parameter Space.R")
       
       par_grids <- list_parameterspace
       
