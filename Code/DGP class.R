@@ -250,15 +250,15 @@ run_simulation.dgp <- function(dgp_obj, seed = 1, samples = 100, N = c(20, 50, 1
         "dependent", 
         fun_indp %>% eval(), 
         environment()
-        )
+      )
       
       # If the output is a matrix object or dataframe convert to list and
       # put into environment
       if (
         (is.matrix(dependent %>% eval()) | 
-        is.data.frame(dependent %>% eval())) && 
+         is.data.frame(dependent %>% eval())) && 
         (dependent %>% eval() %>% ncol() > 1)
-        ) {
+      ) {
         df_dep <- data.frame(dependent %>% eval())
         assign("dependent", map(df_dep, ~ .x), environment())
       }
@@ -301,6 +301,45 @@ get_datasets.dgp <- function(dgp_obj, index = NULL){
     dgp_obj$datasets
   } else {
     dgp_obj$datasets[index]
+  }
+  
+}
+
+subset.dgp <- function(dgp_obj, N = NULL, Samples = NULL){
+  
+  # Check that N and Samples are in range
+  vec_N <- map_dbl(dgp_obj$datasets, ~.x$N) %>% unique()
+  vec_Samples <- map_dbl(dgp_obj$datasets, ~.x$Sample) %>% unique()
+  
+  if (!is.null(N) && !any(vec_N %in% N)) {
+    stop("N is not present in dgp object.", call. = FALSE)
+  }
+
+  if (!is.null(Samples) && !any(vec_Samples %in% Samples)) {
+    stop("Samples is not present in dgp object.", call. = FALSE)
+  }
+  
+  vec_lgl <- dgp_obj$datasets %>% map_lgl(
+    function(dataset){
+      
+      if (!is.null(N)) {
+        lgl_N <- dataset$N %in% N
+      } else {
+        lgl_N <- TRUE
+      } 
+
+      if (!is.null(Samples)) {
+        lgl_Samples <- dataset$Sample %in% Samples
+      } else {
+        lgl_Samples <- TRUE
+      } 
+      
+      lgl_N & lgl_Samples
     }
+  )
+  
+  dgp_obj$datasets <- dgp_obj$datasets[vec_lgl]
+  
+  dgp_obj
   
 }

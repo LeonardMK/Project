@@ -84,6 +84,8 @@ dml_estimator <- function(
     
     if (rsmp_key == "cv") {
       
+      int_folds <- new_rsmp$param_set$values$folds
+      int_repeats <- 1
       list_train <- map(1:new_rsmp$iters, ~ new_rsmp$train_set(.x))
       list_test <- map(1:new_rsmp$iters, ~ new_rsmp$test_set(.x))
       
@@ -258,7 +260,7 @@ dml_estimator <- function(
       `DML algorithm` = dml_est$dml_procedure,
       `N Folds` = dml_est$n_folds,
       `N Rep` = dml_est$n_rep,
-      `Learner` = dml_est$learner,
+      `Learner` = dml_est$learner
     )
     
     list_predictions <- dml_est$predictions
@@ -366,8 +368,8 @@ dml_estimator <- function(
   df_estimates <- do.call(rbind.data.frame, list_estimates) %>% 
     set_rownames(NULL) %>% 
     mutate(
-      ml_g = rep(ml_g, each = 2),
-      ml_m = rep(ml_m, each = 2),
+      ml_g = rep(ml_g, each = if_else(int_repeats == 1, 1, 2)),
+      ml_m = rep(ml_m, each = if_else(int_repeats == 1, 1, 2)),
     ) %>% 
     cbind(time_tuning = rep(df_time$time_tuning, each = 2))
   

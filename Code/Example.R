@@ -53,7 +53,7 @@ test %>% get_formulas()
 test %>% get_arguments()
 # test <- test %>% set_arguments(gamma = runif(10, -2, 2))
 
-test <- test %>% run_simulation(N = c(100), seed = 2, samples = 30)
+test <- test %>% run_simulation(N = c(50, 100), seed = 2, samples = 30)
 
 # Example Estimator evaluation
 list_tune_settings <- list(

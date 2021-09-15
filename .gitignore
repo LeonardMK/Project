@@ -1,3 +1,6 @@
+/mlr3extralearners
+/double-ml-for-r
+*.Rhistory
 *.RData
 *.csv
 *.xlsx
