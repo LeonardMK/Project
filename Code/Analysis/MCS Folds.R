@@ -6,12 +6,10 @@ source("Code/Estimator Functions.R")
 source("Code/Monte Carlo class.R")
 source("Code/Monte Carlo Methods.R")
 
-# Detect number of cores
-int_cores <- parallel::detectCores()
-
 # Specify setup
-vec_ml_g <- c("regr.glmnet", "regr.xgboost", "regr.ranger", "regr.rpart", "regr.kknn")
-vec_ml_m <- c("classif.glmnet", "classif.xgboost", "classif.ranger", "classif.rpart", "classif.kknn")
+vec_ml_g <- c("regr.xgboost")
+
+vec_ml_m <- c("classif.xgboost")
 
 vec_X_cols <- paste0("X.", 1:30)
 vec_D_col <- "D"
@@ -24,28 +22,14 @@ trm_combo <- trm("combo",
                  )
 )
 
-list_tune_settings_cv <- list(
+# Use the method that performed best on the tuning task
+list_tune_settings <- list(
   terminator = trm_combo,
   algorithm = tnr("random_search"),
   rsmp_tune = rsmp("cv", folds = 5),
   measure = list(ml_g = msr("regr.mse"), ml_m = msr("classif.logloss"))
 )
 
-list_tune_settings_rcv <- list(
-  terminator = trm_combo,
-  algorithm = tnr("random_search"),
-  rsmp_tune = rsmp("repeated_cv", folds = 5, repeats = 3),
-  measure = list(ml_g = msr("regr.mse"), ml_m = msr("classif.logloss"))
-)
-
-list_tune_settings_bt <- list(
-  terminator = trm_combo,
-  algorithm = tnr("random_search"),
-  rsmp_tune = rsmp("bootstrap", repeats = 30),
-  measure = list(ml_g = msr("regr.mse"), ml_m = msr("classif.logloss"))
-)
-
-# Check whether estimator works
 list_globals = list(
   list_design_points = list_design_points,
   dml_mean = dml_mean,
@@ -53,82 +37,75 @@ list_globals = list(
   msr_validation_set = msr_validation_set
 )
 
-# For every DGP function differing model selection schemes are used
-# 5 Fold CV
-# 5 CV with 3 repeats
-# Bootstrapping +.632
+# For every DGP function 
+# Select a small sample and a big.
+# Perform cross fitting.
+# Vary between 2, 5 and 10 folds.
+# Vary repeats between 1 and 5
+# Use only one learner.
 
 # Sparse ------------------------------------------------------------------
 
 #
 load("Data/Sparse.RData")
 
-sparse <- sparse %>% subset(N = c(50, 100, 400, 1600), Samples = 1:200)
+sparse <- sparse %>% subset(N = c(50, 800), Samples = 1:200)
 mcs_sparse <- mcs(dml_estimator, sparse)
 
 # Remove sparse to keep working memory ready
 rm(sparse)
 
-mcs_sparse_cv <- mcs_sparse %>% 
+mcs_sparse_5fold <- mcs_sparse %>% 
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = int_cores,
+    workers = 2,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = TRUE,
+    tune = FALSE,
     rsmp_key = "cv",
-    rsmp_args = list(folds = 5),
+    rsmp_args = list(folds = 2),
     par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_cv,
     list_globals = list_globals,
   )
 
-mcs_sparse_cv$dgp$datasets <- NULL
-
-mcs_sparse_rcv <- mcs_sparse %>% 
+mcs_sparse_5fold <- mcs_sparse %>% 
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = int_cores,
+    workers = 2,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = TRUE,
+    tune = FALSE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_rcv,
     list_globals = list_globals,
   )
 
-mcs_sparse_rcv$dgp$datasets <- NULL
-
-mcs_sparse_bt <- mcs_sparse %>% 
+mcs_sparse_10fold <- mcs_sparse %>% 
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = int_cores,
+    workers = 2,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = TRUE,
+    tune = FALSE,
     rsmp_key = "cv",
-    rsmp_args = list(folds = 5),
+    rsmp_args = list(folds = 10),
     par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_bt,
     list_globals = list_globals,
   )
 
-mcs_sparse_bt$dgp$datasets <- NULL
-rm(mcs_sparse)
 
 # Sparse Analysis ---------------------------------------------------------
 
@@ -137,73 +114,63 @@ rm(mcs_sparse)
 
 load("Data/Sine.RData")
 
-sine <- sine %>% subset(N = c(50, 100, 400, 1600), Samples = 1:200)
+sine <- sine %>% subset(N = c(50, 800), Samples = 1:200)
 
 mcs_sine <- mcs(dml_estimator, sine)
 
 # Remove sine to keep working memory ready
 rm(sine)
 
-mcs_sine_cv <- mcs_sine %>% 
+mcs_sine_5fold <- mcs_sine %>% 
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = int_cores,
+    workers = 2,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = TRUE,
+    tune = FALSE,
     rsmp_key = "cv",
-    rsmp_args = list(folds = 5),
+    rsmp_args = list(folds = 2),
     par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_cv,
     list_globals = list_globals,
   )
 
-mcs_sine_cv$dgp$datasets <- NULL
-
-mcs_sine_rcv <- mcs_sine %>% 
+mcs_sine_5fold <- mcs_sine %>% 
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = int_cores,
+    workers = 2,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = TRUE,
+    tune = FALSE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_rcv,
     list_globals = list_globals,
   )
 
-mcs_sine_rcv$dgp$datasets <- NULL
-
-mcs_sine_bt <- mcs_sine %>% 
+mcs_sine_10fold <- mcs_sine %>% 
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = int_cores,
+    workers = 2,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = TRUE,
+    tune = FALSE,
     rsmp_key = "cv",
-    rsmp_args = list(folds = 5),
+    rsmp_args = list(folds = 10),
     par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_bt,
     list_globals = list_globals,
   )
-
-mcs_sine_bt$dgp$datasets <- NULL
-rm(mcs_sine)
 
 # Sine Analysis -----------------------------------------------------------
 
@@ -213,73 +180,63 @@ rm(mcs_sine)
 
 load("Data/Inter.RData")
 
-inter <- inter %>% subset(N = c(50, 100, 400, 1600), Samples = 1:200)
+inter <- inter %>% subset(N = c(50, 800), Samples = 1:200)
 
 mcs_inter <- mcs(dml_estimator, inter)
 
 # Remove inter to keep working memory ready
 rm(inter)
 
-mcs_inter_cv <- mcs_inter %>% 
+mcs_inter_5fold <- mcs_inter %>% 
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = int_cores,
+    workers = 2,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = TRUE,
+    tune = FALSE,
     rsmp_key = "cv",
-    rsmp_args = list(folds = 5),
+    rsmp_args = list(folds = 2),
     par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_cv,
     list_globals = list_globals,
   )
 
-mcs_inter_cv$dgp$datasets <- NULL
-
-mcs_inter_rcv <- mcs_inter %>% 
+mcs_inter_5fold <- mcs_inter %>% 
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = int_cores,
+    workers = 2,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = TRUE,
+    tune = FALSE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_rcv,
     list_globals = list_globals,
   )
 
-mcs_inter_rcv$dgp$datasets <- NULL
-
-mcs_inter_bt <- mcs_inter %>% 
+mcs_inter_10fold <- mcs_inter %>% 
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = int_cores,
+    workers = 2,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = TRUE,
+    tune = FALSE,
     rsmp_key = "cv",
-    rsmp_args = list(folds = 5),
+    rsmp_args = list(folds = 10),
     par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_bt,
     list_globals = list_globals,
   )
-
-mcs_inter_bt$dgp$datasets <- NULL
-rm(mcs_inter)
 
 # Polynomial Interaction Analysis -----------------------------------------
 
@@ -288,73 +245,63 @@ rm(mcs_inter)
 
 load("Data/Neural.RData")
 
-neural <- neural %>% samples(N = c(50, 100, 400, 1600), Samples = 1:200)
+neural <- neural %>% samples(N = c(50, 800), Samples = 1:200)
 
 mcs_neural <- mcs(dml_estimator, neural)
 
 # Remove neural to keep working memory ready
 rm(neural)
 
-mcs_neural_cv <- mcs_neural %>% 
+mcs_neural_5fold <- mcs_neural %>% 
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = int_cores,
+    workers = 2,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = TRUE,
+    tune = FALSE,
     rsmp_key = "cv",
-    rsmp_args = list(folds = 5),
+    rsmp_args = list(folds = 2),
     par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_cv,
     list_globals = list_globals,
   )
 
-mcs_neural_cv$dgp$datasets <- NULL
-
-mcs_neural_rcv <- mcs_neural %>% 
+mcs_neural_5fold <- mcs_neural %>% 
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = int_cores,
+    workers = 2,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = TRUE,
+    tune = FALSE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_rcv,
     list_globals = list_globals,
   )
 
-mcs_neural_rcv$dgp$datasets <- NULL
-
-mcs_neural_bt <- mcs_neural %>% 
+mcs_neural_10fold <- mcs_neural %>% 
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = int_cores,
+    workers = 2,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = TRUE,
+    tune = FALSE,
     rsmp_key = "cv",
-    rsmp_args = list(folds = 5),
+    rsmp_args = list(folds = 10),
     par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_bt,
     list_globals = list_globals,
   )
-
-mcs_neural_bt$dgp$datasets <- NULL
-rm(mcs_neural)
 
 # Neural Network Analysis -------------------------------------------------
 

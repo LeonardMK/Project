@@ -6,6 +6,9 @@ source("Code/Estimator Functions.R")
 source("Code/Monte Carlo class.R")
 source("Code/Monte Carlo Methods.R")
 
+# Detect number of cores
+int_cores <- parallel::detectCores()
+
 # Specify setup
 vec_ml_g <- c("regr.xgboost")
 
@@ -41,6 +44,8 @@ list_globals = list(
 # No sample splitting
 load("Data/Sparse.RData")
 
+sparse <- sparse %>% subset(N = c(50, 100, 400, 1600), Samples = 1:200)
+
 mcs_sparse <- mcs(dml_estimator, sparse)
 
 # Remove sparse to keep working memory ready
@@ -50,13 +55,13 @@ mcs_sparse_naive <- mcs_sparse %>%
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = 2,
+    workers = int_workers,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = FALSE,
+    tune = TRUE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
@@ -71,13 +76,13 @@ mcs_sparse_non_orth <- mcs_sparse %>%
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = 2,
+    workers = int_workers,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = FALSE,
+    tune = TRUE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
@@ -91,13 +96,13 @@ mcs_sparse_non_cf <- mcs_sparse %>%
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = 2,
+    workers = int_workers,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = FALSE,
+    tune = TRUE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
@@ -111,13 +116,13 @@ mcs_sparse_dml <- mcs_sparse %>%
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = 2,
+    workers = int_workers,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = FALSE,
+    tune = TRUE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
@@ -135,6 +140,8 @@ rm(mcs_sparse)
 
 load("Data/Sine.RData")
 
+sine <- sine %>% subset(N = c(50, 100, 400, 1600), Samples = 1:200)
+
 mcs_sine <- mcs(dml_estimator, sine)
 
 # Remove sine to keep working memory ready
@@ -144,13 +151,13 @@ mcs_sine_naive <- mcs_sine %>%
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = 2,
+    workers = int_workers,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = FALSE,
+    tune = TRUE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
@@ -165,13 +172,13 @@ mcs_sine_non_orth <- mcs_sine %>%
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = 2,
+    workers = int_workers,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = FALSE,
+    tune = TRUE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
@@ -185,13 +192,13 @@ mcs_sine_non_cf <- mcs_sine %>%
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = 2,
+    workers = int_workers,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = FALSE,
+    tune = TRUE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
@@ -205,13 +212,13 @@ mcs_sine_dml <- mcs_sine %>%
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = 2,
+    workers = int_workers,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = FALSE,
+    tune = TRUE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
@@ -231,6 +238,8 @@ rm(mcs_sine)
 
 load("Data/Inter.RData")
 
+inter <- inter %>% subset(N = c(50, 100, 400, 1600), Samples = 1:200)
+
 mcs_inter <- mcs(dml_estimator, inter)
 
 # Remove inter to keep working memory ready
@@ -240,13 +249,13 @@ mcs_inter_naive <- mcs_inter %>%
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = 2,
+    workers = int_workers,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = FALSE,
+    tune = TRUE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
@@ -261,13 +270,13 @@ mcs_inter_non_orth <- mcs_inter %>%
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = 2,
+    workers = int_workers,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = FALSE,
+    tune = TRUE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
@@ -281,13 +290,13 @@ mcs_inter_non_cf <- mcs_inter %>%
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = 2,
+    workers = int_workers,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = FALSE,
+    tune = TRUE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
@@ -301,13 +310,13 @@ mcs_inter_dml <- mcs_inter %>%
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = 2,
+    workers = int_workers,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = FALSE,
+    tune = TRUE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
@@ -326,6 +335,8 @@ rm(mcs_inter)
 
 load("Data/Neural.RData")
 
+neural <- neural %>% subset(N = c(50, 100, 400, 1600), Samples = 1:200)
+
 mcs_neural <- mcs(dml_estimator, neural)
 
 # Remove neural to keep working memory ready
@@ -335,13 +346,13 @@ mcs_neural_naive <- mcs_neural %>%
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = 2,
+    workers = int_workers,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = FALSE,
+    tune = TRUE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
@@ -356,13 +367,13 @@ mcs_neural_non_orth <- mcs_neural %>%
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = 2,
+    workers = int_workers,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = FALSE,
+    tune = TRUE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
@@ -376,13 +387,13 @@ mcs_neural_non_cf <- mcs_neural %>%
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = 2,
+    workers = int_workers,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = FALSE,
+    tune = TRUE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,
@@ -396,13 +407,13 @@ mcs_neural_dml <- mcs_neural %>%
   run_simulation(
     seed = 10, 
     parallel = TRUE,
-    workers = 2,
+    workers = int_workers,
     x_cols = vec_X_cols,
     d_cols = vec_D_col,
     y_col = vec_Y_col,
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
-    tune = FALSE,
+    tune = TRUE,
     rsmp_key = "cv",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace,

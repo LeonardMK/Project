@@ -19,35 +19,37 @@ list_glmnet <- list(
 # max_depth: 0, inf Integer
 list_xgboost <- list(
   ml_g = ps(
-    eta = p_dbl(lower = 0.01, upper = 1),
+    eta = p_dbl(lower = 0, upper = 0.1),
     subsample = p_dbl(lower = 0.1, upper = 1),
-    max_depth = p_int(lower = 1, upper = 6)
+    max_depth = p_int(lower = 1, upper = 7),
+    nrounds = p_int(lower = 100, upper = 3000)
   ),
   ml_m = ps(
-    eta = p_dbl(lower = 0.01, upper = 1),
+    eta = p_dbl(lower = 0, upper = 0.1),
     subsample = p_dbl(lower = 0.1, upper = 1),
-    max_depth = p_int(lower = 1, upper = 6)
+    max_depth = p_int(lower = 1, upper = 7),
+    nrounds = p_int(lower = 100, upper = 3000)
   )
 )
 
 list_ranger <- list(
   ml_g = ps(
     mtry = p_int(lower = 1, upper = Inf),
-    num.trees = p_int(lower = 100, upper = 1000)
+    num.trees = p_int(lower = 1000, upper = 3000)
   ),
   ml_m = ps(
     mtry = p_int(lower = 1, upper = Inf),
-    num.trees = p_int(lower = 100, upper = 1000)
+    num.trees = p_int(lower = 1000, upper = 3000)
   )
 )
 
 # Regression Trees
 list_rpart <- list(
   ml_g = ps(
-    cp = p_dbl(lower = 0.01, upper = 0.2)
+    cp = p_dbl(lower = 1, upper = exp(0.1), logscale = TRUE)
   ),
   ml_m = ps(
-    cp = p_dbl(lower = 0.01, upper = 0.2)
+    cp = p_dbl(lower = 1, upper = exp(0.1), logscale = TRUE)
   )
 )
 
