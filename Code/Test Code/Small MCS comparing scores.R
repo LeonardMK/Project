@@ -40,7 +40,7 @@ list_globals = list(
 dml_ranger_no_tuning <- dml_estimator(
   dataset, x_cols = paste0("X.", 1:30), y_col = "Y", d_cols = "D", 
   ml_g = "regr.ranger", ml_m = "classif.ranger",
-  list_globals = list_globals, tune = FALSE, 
+  list_globals = list_globals, tune = FALSE, apply_cross_fitting = FALSE,
   par_grids = list(ranger = list_ranger)
   )
 
@@ -67,7 +67,7 @@ mcs_small_iv <- mcs_small %>%
     ml_m = "classif.ranger",
     score = "IV-type",
     draw_sample_splitting = FALSE,
-    tune = FALSE,
+    tune = TRUE,
     tune_settings = list_tune_settings,
     par_grids = list(ranger = list_ranger), 
   )

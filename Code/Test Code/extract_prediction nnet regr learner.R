@@ -118,3 +118,60 @@ if (!fold_specific_target) {
     preds = extract_prediction(resampling_pred, learner_class, n_obs)
   }
 }
+
+if (compareVersion(as.character(packageVersion("mlr3")), "0.11.0") < 0) {
+  ind_name = "row_id"
+} else {
+  ind_name = "row_ids"
+}
+
+if (learner_class == "LearnerRegr") {
+  
+  if (is.list(obj_resampling)) {
+    
+    if (all(purrr::map_lgl(obj_resampling, ~ .x$learner$id == "regr.nnet"))) {
+      resp_name = "response.V1"
+    } else {
+      resp_name = "response"
+    }
+    
+  } else if ("ResampleResult" %in% class(obj_resampling)) {
+    resp_name = "response"
+  }
+  
+} else if (learner_class == "LearnerClassif") {
+  resp_name = "prob.1"
+}
+
+if (return_train_preds) {
+  if (testR6(obj_resampling, classes = "ResampleResult")) {
+    n_iters = obj_resampling$resampling$iters
+    preds = vector("list", n_iters)
+    f_hat_list = lapply(
+      1:n_iters,
+      function(x) as.data.table(obj_resampling$predictions("train")[[x]]))
+    for (i_iter in 1:n_iters) {
+      preds_vec = rep(NA_real_, n_obs)
+      f_hat = f_hat_list[[i_iter]]
+      preds_vec[f_hat[[ind_name]]] = f_hat[[resp_name]]
+      preds[[i_iter]] = preds_vec
+    }
+  } else {
+    n_obj_rsmp = length(obj_resampling)
+    preds = vector("list", n_obj_rsmp)
+    for (i_obj_rsmp in 1:n_obj_rsmp) {
+      preds_vec = vector("numeric", length = n_obs)
+      f_hat = as.data.table(obj_resampling[[i_obj_rsmp]]$prediction("train"))
+      preds_vec[f_hat[[ind_name]]] = f_hat[[resp_name]]
+      preds[[i_obj_rsmp]] = preds_vec
+    }
+  }
+} else {
+  preds = rep(NA_real_, n_obs)
+  if (testR6(obj_resampling, classes = "ResampleResult")) obj_resampling = list(obj_resampling)
+  n_obj_rsmp = length(obj_resampling)
+  for (i_obj_rsmp in 1:n_obj_rsmp) {
+    f_hat = as.data.table(obj_resampling[[i_obj_rsmp]]$prediction("test"))
+    preds[f_hat[[ind_name]]] = f_hat[[resp_name]]
+  }
+}

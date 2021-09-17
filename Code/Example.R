@@ -71,13 +71,22 @@ list_tune_settings <- list(
 vec_ml_g <- c("regr.glmnet", "regr.xgboost", "regr.ranger", "regr.rpart", "regr.kknn")
 vec_ml_m <- c("classif.glmnet", "classif.xgboost", "classif.ranger", "classif.rpart", "classif.kknn")
 
+list_globals = list(
+  list_design_points = list_design_points,
+  dml_mean = dml_mean,
+  calc_err_approx = calc_err_approx,
+  msr_validation_set = msr_validation_set
+)
+
 test_dataset <- test$datasets$`Sample = 10 with N = 100`$data
 x <- dml_estimator(dataset = test_dataset, x_cols = paste0("X.", 1:2), y_col = "Y", d_cols = "D", 
-              ml_g = vec_ml_g, 
-              ml_m = vec_ml_m, 
+              ml_g = "regr.xgboost", 
+              ml_m = "classif.xgboost", 
               draw_sample_splitting = FALSE, tune = FALSE, 
               tune_settings = list_tune_settings,
-              par_grids = list_parameterspace
+              par_grids = list_parameterspace, 
+              rsmp_key = "no_cf",
+              list_globals = list_globals
 )
 
 # Create a mcs object

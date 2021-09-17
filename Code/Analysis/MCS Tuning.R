@@ -1,17 +1,21 @@
 library(DoubleML)
 library(mlr3verse)
+library(mlr3extralearners)
 library(tidyverse)
 
 source("Code/Estimator Functions.R")
 source("Code/Monte Carlo class.R")
 source("Code/Monte Carlo Methods.R")
+source("Code/Utils.R")
 
 # Detect number of cores
-int_cores <- parallel::detectCores()
+int_cores <- parallel::detectCores() - 1
 
 # Specify setup
-vec_ml_g <- c("regr.glmnet", "regr.xgboost", "regr.ranger", "regr.rpart", "regr.kknn")
-vec_ml_m <- c("classif.glmnet", "classif.xgboost", "classif.ranger", "classif.rpart", "classif.kknn")
+vec_ml_g <- c("regr.glmnet", "regr.xgboost", "regr.ranger", "regr.rpart", 
+              "regr.kknn", "regr.nnet")
+vec_ml_m <- c("classif.glmnet", "classif.xgboost", "classif.ranger", 
+              "classif.rpart", "classif.kknn", "classif.nnet")
 
 vec_X_cols <- paste0("X.", 1:30)
 vec_D_col <- "D"
@@ -19,7 +23,7 @@ vec_Y_col <- "Y"
 
 trm_combo <- trm("combo",
                  list(
-                   trm("evals", n_evals = 100),
+                   trm("evals", n_evals = 50),
                    trm("stagnation")
                  )
 )
@@ -88,6 +92,8 @@ mcs_sparse_cv <- mcs_sparse %>%
   )
 
 mcs_sparse_cv$dgp$datasets <- NULL
+quick_save(mcs_sparse_cv)
+rm(mcs_sparse_cv)
 
 mcs_sparse_rcv <- mcs_sparse %>% 
   run_simulation(
@@ -108,6 +114,8 @@ mcs_sparse_rcv <- mcs_sparse %>%
   )
 
 mcs_sparse_rcv$dgp$datasets <- NULL
+quick_save(mcs_sparse_rcv)
+rm(mcs_sparse_rcv)
 
 mcs_sparse_bt <- mcs_sparse %>% 
   run_simulation(
@@ -128,6 +136,9 @@ mcs_sparse_bt <- mcs_sparse %>%
   )
 
 mcs_sparse_bt$dgp$datasets <- NULL
+quick_save(mcs_sparse_bt)
+rm(mcs_sparse_bt)
+
 rm(mcs_sparse)
 
 # Sparse Analysis ---------------------------------------------------------
@@ -163,6 +174,8 @@ mcs_sine_cv <- mcs_sine %>%
   )
 
 mcs_sine_cv$dgp$datasets <- NULL
+quick_save(mcs_sine_cv)
+rm(mcs_sine_cv)
 
 mcs_sine_rcv <- mcs_sine %>% 
   run_simulation(
@@ -183,6 +196,8 @@ mcs_sine_rcv <- mcs_sine %>%
   )
 
 mcs_sine_rcv$dgp$datasets <- NULL
+quick_save(mcs_sine_rcv)
+rm(mcs_sine_rcv)
 
 mcs_sine_bt <- mcs_sine %>% 
   run_simulation(
@@ -203,6 +218,9 @@ mcs_sine_bt <- mcs_sine %>%
   )
 
 mcs_sine_bt$dgp$datasets <- NULL
+quick_save(mcs_sine_bt)
+rm(mcs_sine_bt)
+
 rm(mcs_sine)
 
 # Sine Analysis -----------------------------------------------------------
@@ -239,6 +257,8 @@ mcs_inter_cv <- mcs_inter %>%
   )
 
 mcs_inter_cv$dgp$datasets <- NULL
+quick_save(mcs_inter_cv)
+rm(mcs_inter_cv)
 
 mcs_inter_rcv <- mcs_inter %>% 
   run_simulation(
@@ -259,6 +279,8 @@ mcs_inter_rcv <- mcs_inter %>%
   )
 
 mcs_inter_rcv$dgp$datasets <- NULL
+quick_save(mcs_inter_rcv)
+rm(mcs_inter_rcv)
 
 mcs_inter_bt <- mcs_inter %>% 
   run_simulation(
@@ -279,6 +301,9 @@ mcs_inter_bt <- mcs_inter %>%
   )
 
 mcs_inter_bt$dgp$datasets <- NULL
+quick_save(mcs_inter_bt)
+rm(mcs_inter_bt)
+
 rm(mcs_inter)
 
 # Polynomial Interaction Analysis -----------------------------------------
@@ -314,6 +339,8 @@ mcs_neural_cv <- mcs_neural %>%
   )
 
 mcs_neural_cv$dgp$datasets <- NULL
+quick_save(mcs_neural_cv)
+rm(mcs_neural_cv)
 
 mcs_neural_rcv <- mcs_neural %>% 
   run_simulation(
@@ -334,6 +361,8 @@ mcs_neural_rcv <- mcs_neural %>%
   )
 
 mcs_neural_rcv$dgp$datasets <- NULL
+quick_save(mcs_neural_rcv)
+rm(mcs_neural_rcv)
 
 mcs_neural_bt <- mcs_neural %>% 
   run_simulation(
@@ -354,6 +383,9 @@ mcs_neural_bt <- mcs_neural %>%
   )
 
 mcs_neural_bt$dgp$datasets <- NULL
+quick_save(mcs_neural_bt)
+rm(mcs_neural_bt)
+
 rm(mcs_neural)
 
 # Neural Network Analysis -------------------------------------------------

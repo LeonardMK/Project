@@ -35,21 +35,21 @@ list_xgboost <- list(
 list_ranger <- list(
   ml_g = ps(
     mtry = p_int(lower = 1, upper = Inf),
-    num.trees = p_int(lower = 1000, upper = 3000)
+    num.trees = p_int(lower = 100, upper = 3000)
   ),
   ml_m = ps(
     mtry = p_int(lower = 1, upper = Inf),
-    num.trees = p_int(lower = 1000, upper = 3000)
+    num.trees = p_int(lower = 100, upper = 3000)
   )
 )
 
 # Regression Trees
 list_rpart <- list(
   ml_g = ps(
-    cp = p_dbl(lower = 1, upper = exp(0.1), logscale = TRUE)
+    cp = p_dbl(lower = 0, upper = 0.1, logscale = FALSE)
   ),
   ml_m = ps(
-    cp = p_dbl(lower = 1, upper = exp(0.1), logscale = TRUE)
+    cp = p_dbl(lower = 0, upper = 0.1, logscale = FALSE)
   )
 )
 
@@ -95,7 +95,7 @@ list_parameterspace <- list(
 # In case no tuning is performed and only default values are used, design points are needed
 list_design_points <- list(
   glmnet = data.table(alpha = 1),
-  xgboost = data.table(eta = 0.3, max_depth = 6, subsample = 1),
+  xgboost = data.table(eta = 0.1, max_depth = 7, subsample = 1, nrounds = 500),
   ranger = data.table(mtry = 1, num.trees = 500),
   rpart = data.table(cp = 0.01),
   # svm = data.table(kernel = "radial", epsilon = 0.1),

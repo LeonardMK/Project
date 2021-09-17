@@ -81,7 +81,11 @@ run_simulation.mcs <- function(mcs_obj, seed, samples = NULL, N = NULL,
     mcs_obj$dgp <- mcs_obj$dgp %>% run_simulation(seed, samples, N)
   }
   
-  plan(multisession, workers = workers)
+  if (Sys.info()["sysname"] == "Windows") {
+    plan(multisession, workers = workers)
+  } else {
+    plan(multicore, workers = workers)
+  }
   
   list_estimates <- future_map(mcs_obj$dgp$datasets, function(dataset){
     

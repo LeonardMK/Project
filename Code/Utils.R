@@ -217,7 +217,7 @@ calc_err_estimate <- function(mcs_obj, function_names = c("g", "m"), categorial 
               MSE = dbl_mse, 
               Bias = dbl_bias, 
               Variance = dbl_variance
-              )
+            )
             
           }) %>% 
           map_df(~ .x) %>% 
@@ -332,7 +332,7 @@ estimate_rate <- function(mse_data, plot = TRUE, na.rm = TRUE){
       Median = median(Rate, na.rm = na.rm),
       `75% Quantile` = quantile(Rate, na.rm = na.rm, prob = 0.75),
       Maximum = max(Rate, na.rm = na.rm)
-      )
+    )
   
   if (plot) {
     
@@ -403,7 +403,7 @@ msr_validation_set <- function(msr, truth, response){
   # Check that it is an integer
   if (floor(int_times) != int_times) {
     stop("Response is not a multiple of truth.", call. = FALSE)
-    }
+  }
   
   vec_truth_repeated <- rep(truth, int_times)
   
@@ -411,7 +411,7 @@ msr_validation_set <- function(msr, truth, response){
     
     if (!is.factor(vec_truth_repeated)) {
       stop("Truth must be of type factor.", call. = FALSE)
-      }
+    }
     
     # Assume for now that only two classes are present
     mat_prob <- cbind(1 - vec_response, vec_response)
@@ -440,5 +440,13 @@ calc_err_approx <- function(truth, response, na.rm = TRUE){
   Var <- var(response, na.rm = na.rm)
   
   c(mse = MSE, bias = Bias, variance = Var)
+  
+}
+
+quick_save <- function(x, folder = "Results/Data/"){
+  
+  str_x_name <- deparse(quote(x))
+  str_path <- paste0(folder, str_x_name, ".RData")
+  save(x, file = str_path)
   
 }

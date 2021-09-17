@@ -1,9 +1,7 @@
 library(DoubleML)
 library(mlr3)
-library(mlr3learners)
+library(mlr3extralearners)
 library(data.table)
-
-setwd("C:/Users/Wilms/OneDrive - uni-bonn.de/Uni Bonn/6. Semester/Masterarbeit/Project/")
 
 source("Code/DGP functions.R")
 source("Code/Definition Parameter Space.R")
