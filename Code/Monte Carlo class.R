@@ -73,35 +73,59 @@ print.mcs <- function(mcs_obj){
 
 # Run MCS function. Allows for parallel execution
 run_simulation.mcs <- function(mcs_obj, seed, samples = NULL, N = NULL, 
-                               parallel = FALSE, workers = 1, globals = TRUE, ...){
-  list_design_points <- list_design_points
-  dml_mean <- dml_mean
+                               workers = 1, globals = TRUE, ...){
+
   # Create datasets if not already present
   if (length(mcs_obj$dgp$datasets) == 0) {
     mcs_obj$dgp <- mcs_obj$dgp %>% run_simulation(seed, samples, N)
   }
   
-  if (Sys.info()["sysname"] == "Windows") {
-    plan(multisession, workers = workers)
-  } else {
-    plan(multicore, workers = workers)
-  }
-  
-  list_estimates <- future_map(mcs_obj$dgp$datasets, function(dataset){
+  if (workers == 1) {
     
-    list(
-      Output = mcs_obj$estimator(dataset$data, ...), 
-      N = dataset$N, 
-      Sample = dataset$Sample
+    pbar <- progress::progress_bar$new(
+      format = "Calculating [:bar] :percent eta: :eta",
+      total = length(mcs_obj$dgp$datasets),
+      clear = FALSE,
     )
-  }, 
-  .options = furrr_options(
-    globals = globals,
-    packages = sessionInfo() %>% pluck("otherPkgs") %>% names(), 
-    seed = seed
-  ),
-  .progress = TRUE)
-  
+    
+    list_estimates <- map(mcs_obj$dgp$datasets, function(dataset){
+      
+      pbar$tick()
+      
+      list(
+        Output = mcs_obj$estimator(dataset$data, ...), 
+        N = dataset$N, 
+        Sample = dataset$Sample
+      )
+      
+    })
+    
+  } else if (workers > 1) {
+    
+    if (Sys.info()["sysname"] == "Windows") {
+      plan(multisession, workers = workers)
+    } else {
+      plan(multicore, workers = workers)
+    }
+    
+    list_estimates <- future_map(mcs_obj$dgp$datasets, function(dataset){
+      
+      list(
+        Output = mcs_obj$estimator(dataset$data, ...), 
+        N = dataset$N, 
+        Sample = dataset$Sample
+      )
+    }, 
+    .options = furrr_options(
+      globals = globals,
+      packages = sessionInfo() %>% pluck("otherPkgs") %>% names(), 
+      seed = seed
+    ),
+    .progress = TRUE)
+    
+  } else {
+    stop("'workers' has to be a positive integer.")
+  }
   # Keep estimates in whatever form. This allows for more flexibility
   names(list_estimates) <- mcs_obj$dgp$datasets %>% names()
   mcs_obj$results <- list_estimates

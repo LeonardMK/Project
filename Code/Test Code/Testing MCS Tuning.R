@@ -67,7 +67,7 @@ list_globals = list(
 #
 load("Data/Sparse.RData")
 
-sparse <- sparse %>% subset(N = c(50, 100, 400, 1600), Samples = 1:200)
+sparse <- sparse %>% subset(N = c(50, 100, 400), Samples = 1:3)
 mcs_sparse <- mcs(dml_estimator, sparse)
 
 # Remove sparse to keep working memory ready
@@ -165,7 +165,7 @@ rm(mcs_sparse)
 
 load("Data/Sine.RData")
 
-sine <- sine %>% subset(N = c(50, 100, 400, 1600), Samples = 1:200)
+sine <- sine %>% subset(N = c(50, 100, 400), Samples = 1:3)
 
 mcs_sine <- mcs(dml_estimator, sine)
 
@@ -265,7 +265,7 @@ rm(mcs_sine)
 
 load("Data/Inter.RData")
 
-inter <- inter %>% subset(N = c(50, 100, 400, 1600), Samples = 1:200)
+inter <- inter %>% subset(N = c(50, 100, 400), Samples = 1:3)
 
 mcs_inter <- mcs(dml_estimator, inter)
 
@@ -364,7 +364,7 @@ rm(mcs_inter)
 
 load("Data/Neural.RData")
 
-neural <- neural %>% samples(N = c(50, 100, 400, 1600), Samples = 1:200)
+neural <- neural %>% samples(N = c(50, 100, 400), Samples = 1:3)
 
 mcs_neural <- mcs(dml_estimator, neural)
 
