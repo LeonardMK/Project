@@ -1,4 +1,3 @@
-# Add no tuning case
 library(DoubleML)
 library(mlr3verse)
 library(mlr3extralearners)
@@ -12,6 +11,7 @@ source("Code/Utils.R")
 
 # Detect number of cores
 int_cores <- parallel::detectCores() - 1
+str_path <- "Results/Data/"
 
 # Specify setup
 vec_ml_g <- c("regr.xgboost")
@@ -73,7 +73,7 @@ mcs_sparse_naive <- mcs_sparse %>%
   )
 
 mcs_sparse_naive$dgp$datasets <- NULL
-quick_save(mcs_sparse_naive)
+save(mcs_sparse_naive, file = paste0(str_path, "/mcs_sparse_naive.RData"))
 rm(mcs_sparse_naive)
 
 mcs_sparse_non_orth <- mcs_sparse %>% 
@@ -94,7 +94,7 @@ mcs_sparse_non_orth <- mcs_sparse %>%
   )
 
 mcs_sparse_non_orth$dgp$datasets <- NULL
-quick_save(mcs_sparse_non_orth)
+save(mcs_sparse_non_orth, file = paste0(str_path, "/mcs_sparse_non_orth.RData"))
 rm(mcs_sparse_non_orth)
 
 mcs_sparse_non_cf <- mcs_sparse %>% 
@@ -115,7 +115,7 @@ mcs_sparse_non_cf <- mcs_sparse %>%
   )
 
 mcs_sparse_non_cf$dgp$datasets <- NULL
-quick_save(mcs_sparse_non_cf)
+save(mcs_sparse_non_cf, file = paste0(str_path, "/mcs_sparse_non_cf.RData"))
 rm(mcs_sparse_non_cf)
 
 mcs_sparse_dml <- mcs_sparse %>% 
@@ -135,7 +135,7 @@ mcs_sparse_dml <- mcs_sparse %>%
   )
 
 mcs_sparse_dml$dgp$datasets <- NULL
-quick_save(mcs_sparse_dml)
+save(mcs_sparse_dml, file = paste0(str_path, "/mcs_sparse_dml.RData"))
 rm(mcs_sparse_dml)
 
 rm(mcs_sparse)
@@ -173,7 +173,7 @@ mcs_sine_naive <- mcs_sine %>%
   )
 
 mcs_sine_naive$dgp$datasets <- NULL
-quick_save(mcs_sine_naive)
+save(mcs_sine_naive, file = paste0(str_path, "/mcs_sine_naive.RData"))
 rm(mcs_sine_naive)
 
 mcs_sine_non_orth <- mcs_sine %>% 
@@ -194,7 +194,7 @@ mcs_sine_non_orth <- mcs_sine %>%
   )
 
 mcs_sine_non_orth$dgp$datasets <- NULL
-quick_save(mcs_sine_non_orth)
+save(mcs_sine_non_orth, file = paste0(str_path, "/mcs_sine_non_orth.RData"))
 rm(mcs_sine_non_orth)
 
 mcs_sine_non_cf <- mcs_sine %>% 
@@ -215,7 +215,7 @@ mcs_sine_non_cf <- mcs_sine %>%
   )
 
 mcs_sine_non_cf$dgp$datasets <- NULL
-quick_save(mcs_sine_non_cf)
+save(mcs_sine_non_cf, file = paste0(str_path, "/mcs_sine_non_cf.RData"))
 rm(mcs_sine_non_cf)
 
 mcs_sine_dml <- mcs_sine %>% 
@@ -235,7 +235,7 @@ mcs_sine_dml <- mcs_sine %>%
   )
 
 mcs_sine_dml$dgp$datasets <- NULL
-quick_save(mcs_sine_dml)
+save(mcs_sine_dml, file = paste0(str_path, "/mcs_sine_dml.RData"))
 rm(mcs_sine_dml)
 
 rm(mcs_sine)
@@ -275,7 +275,7 @@ mcs_inter_naive <- mcs_inter %>%
   )
 
 mcs_inter_naive$dgp$datasets <- NULL
-quick_save(mcs_inter_naive)
+save(mcs_inter_naive, file = paste0(str_path, "/mcs_inter_naive.RData"))
 rm(mcs_inter_naive)
 
 mcs_inter_non_orth <- mcs_inter %>% 
@@ -296,7 +296,7 @@ mcs_inter_non_orth <- mcs_inter %>%
   )
 
 mcs_inter_non_orth$dgp$datasets <- NULL
-quick_save(mcs_inter_non_orth)
+save(mcs_inter_non_orth, file = paste0(str_path, "/mcs_inter_non_orth.RData"))
 rm(mcs_inter_non_orth)
 
 mcs_inter_non_cf <- mcs_inter %>% 
@@ -317,7 +317,7 @@ mcs_inter_non_cf <- mcs_inter %>%
   )
 
 mcs_inter_non_cf$dgp$datasets <- NULL
-quick_save(mcs_inter_non_cf)
+save(mcs_inter_non_cf, file = paste0(str_path, "/mcs_inter_non_cf.RData"))
 rm(mcs_inter_non_cf)
 
 mcs_inter_dml <- mcs_inter %>% 
@@ -337,7 +337,7 @@ mcs_inter_dml <- mcs_inter %>%
   )
 
 mcs_inter_dml$dgp$datasets <- NULL
-quick_save(mcs_inter_dml)
+save(mcs_inter_dml, file = paste0(str_path, "/mcs_inter_dml.RData"))
 rm(mcs_inter_dml)
 
 rm(mcs_inter)
@@ -376,7 +376,7 @@ mcs_neural_naive <- mcs_neural %>%
   )
 
 mcs_neural_naive$dgp$datasets <- NULL
-quick_save(mcs_neural_naive)
+save(mcs_neural_naive, file = paste0(str_path, "/mcs_neural_naive.RData"))
 rm(mcs_neural_naive)
 
 mcs_neural_non_orth <- mcs_neural %>% 
@@ -397,7 +397,7 @@ mcs_neural_non_orth <- mcs_neural %>%
   )
 
 mcs_neural_non_orth$dgp$datasets <- NULL
-quick_save(mcs_neural_non_orth)
+save(mcs_neural_non_orth, file = paste0(str_path, "/mcs_neural_non_orth.RData"))
 rm(mcs_neural_non_orth)
 
 mcs_neural_non_cf <- mcs_neural %>% 
@@ -418,7 +418,7 @@ mcs_neural_non_cf <- mcs_neural %>%
   )
 
 mcs_neural_non_cf$dgp$datasets <- NULL
-quick_save(mcs_neural_non_cf)
+save(mcs_neural_non_cf, file = paste0(str_path, "/mcs_neural_non_cf.RData"))
 rm(mcs_neural_non_cf)
 
 mcs_neural_dml <- mcs_neural %>% 
@@ -438,7 +438,7 @@ mcs_neural_dml <- mcs_neural %>%
   )
 
 mcs_neural_dml$dgp$datasets <- NULL
-quick_save(mcs_neural_dml)
+save(mcs_neural_dml, file = paste0(str_path, "/mcs_neural_dml.RData"))
 rm(mcs_neural_dml)
 
 rm(mcs_neural)

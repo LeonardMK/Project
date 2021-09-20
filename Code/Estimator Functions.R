@@ -603,14 +603,14 @@ dml_estimator <- function(
       list_params_ml_g <- list_tuning %>% 
         pluck(str_remove(str_g, "^.*\\.")) %>% 
         pluck("Settings") %>% 
-        pluck("Tuning Result") %>% 
+        pluck("Tuning Results") %>% 
         pluck(d_cols) %>% 
         map(~ .x$ml_g$params)
       
       list_params_ml_m <- list_tuning %>% 
         pluck(str_remove(str_m, "^.*\\.")) %>% 
         pluck("Settings") %>% 
-        pluck("Tuning Result") %>% 
+        pluck("Tuning Results") %>% 
         pluck(d_cols) %>% 
         map(~ .x$ml_m$params)
       
@@ -653,11 +653,16 @@ dml_estimator <- function(
       
       df_estimates_best <- df_estimates_best %>% 
         rbind(vec_mean)
+      
+      df_estimates_best$type_rep_est <- c("Median", "Mean")
+      
+    } else {
+      df_estimates_best$type_rep_est <- "No Repeats"
     }
     
-    df_estimates$ml_g <- dml_est$learner$ml_g$id
-    df_estimates$ml_m <- dml_est$learner$ml_m$id
-    df_estimates$time_tuning <- NA
+    df_estimates_best$ml_g <- dml_est$learner$ml_g$id
+    df_estimates_best$ml_m <- dml_est$learner$ml_m$id
+    df_estimates_best$time_tuning <- NA
     
     list_settings <- list(
       `DML algorithm` = dml_est$dml_procedure,

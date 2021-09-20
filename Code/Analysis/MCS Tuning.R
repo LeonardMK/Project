@@ -3,6 +3,7 @@ library(mlr3verse)
 library(mlr3extralearners)
 library(tidyverse)
 
+source("Code/Definition Parameter Space.R")
 source("Code/Estimator Functions.R")
 source("Code/Monte Carlo class.R")
 source("Code/Monte Carlo Methods.R")
@@ -65,7 +66,6 @@ list_globals = list(
 
 # Sparse ------------------------------------------------------------------
 
-#
 load("Data/Sparse.RData")
 
 sparse <- sparse %>% subset(N = c(50, 100, 400, 1600), Samples = 1:200)
@@ -91,7 +91,7 @@ mcs_sparse_not <- mcs_sparse %>%
   )
 
 mcs_sparse_not$dgp$datasets <- NULL
-save(mcs_sparse_not, file = paste0(str_path, "/", mcs_sparse_not))
+save(mcs_sparse_not, file = paste0(str_path, "/mcs_sparse_not.RData"))
 rm(mcs_sparse_not)
 
 mcs_sparse_cv <- mcs_sparse %>% 
@@ -112,7 +112,7 @@ mcs_sparse_cv <- mcs_sparse %>%
   )
 
 mcs_sparse_cv$dgp$datasets <- NULL
-save(mcs_sparse_cv, file = paste0(str_path, "/", mcs_sparse_cv))
+save(mcs_sparse_cv, file = paste0(str_path, "/mcs_sparse_cv.RData"))
 rm(mcs_sparse_cv)
 
 mcs_sparse_rcv <- mcs_sparse %>% 
@@ -133,7 +133,7 @@ mcs_sparse_rcv <- mcs_sparse %>%
   )
 
 mcs_sparse_rcv$dgp$datasets <- NULL
-save(mcs_sparse_rcv, file = paste0(str_path, "/", mcs_sparse_rcv))
+save(mcs_sparse_rcv, file = paste0(str_path, "/mcs_sparse_rcv.RData"))
 rm(mcs_sparse_rcv)
 
 mcs_sparse_bt <- mcs_sparse %>% 
@@ -154,7 +154,7 @@ mcs_sparse_bt <- mcs_sparse %>%
   )
 
 mcs_sparse_bt$dgp$datasets <- NULL
-save(mcs_sparse_bt, file = paste0(str_path, "/", "/", mcs_sparse_bt))
+save(mcs_sparse_bt, file = paste0(str_path, "/mcs_sparse_bt.RData"))
 rm(mcs_sparse_bt)
 
 rm(mcs_sparse)
@@ -190,7 +190,7 @@ mcs_sine_not <- mcs_sine %>%
   )
 
 mcs_sine_not$dgp$datasets <- NULL
-save(mcs_sine_not, file = paste0(str_path, "/", mcs_sine_not))
+save(mcs_sine_not, file = paste0(str_path, "/mcs_sine_not.RData"))
 rm(mcs_sine_not)
 
 mcs_sine_cv <- mcs_sine %>% 
@@ -211,7 +211,7 @@ mcs_sine_cv <- mcs_sine %>%
   )
 
 mcs_sine_cv$dgp$datasets <- NULL
-save(mcs_sine_cv, file = paste0(str_path, "/", mcs_sine_cv))
+save(mcs_sine_cv, file = paste0(str_path, "/mcs_sine_cv.RData"))
 rm(mcs_sine_cv)
 
 mcs_sine_rcv <- mcs_sine %>% 
@@ -232,7 +232,7 @@ mcs_sine_rcv <- mcs_sine %>%
   )
 
 mcs_sine_rcv$dgp$datasets <- NULL
-save(mcs_sine_rcv, file = paste0(str_path, "/", mcs_sine_rcv))
+save(mcs_sine_rcv, file = paste0(str_path, "/mcs_sine_rcv.RData"))
 rm(mcs_sine_rcv)
 
 mcs_sine_bt <- mcs_sine %>% 
@@ -253,7 +253,7 @@ mcs_sine_bt <- mcs_sine %>%
   )
 
 mcs_sine_bt$dgp$datasets <- NULL
-save(mcs_sine_bt, file = paste0(str_path, "/", mcs_sine_bt))
+save(mcs_sine_bt, file = paste0(str_path, "/mcs_sine_bt.RData"))
 rm(mcs_sine_bt)
 
 rm(mcs_sine)
@@ -290,7 +290,7 @@ mcs_inter_not <- mcs_inter %>%
   )
 
 mcs_inter_not$dgp$datasets <- NULL
-save(mcs_inter_not, file = paste0(str_path, "/", mcs_inter_not))
+save(mcs_inter_not, file = paste0(str_path, "/mcs_inter_not.RData"))
 rm(mcs_inter_not)
 
 mcs_inter_cv <- mcs_inter %>% 
@@ -311,7 +311,7 @@ mcs_inter_cv <- mcs_inter %>%
   )
 
 mcs_inter_cv$dgp$datasets <- NULL
-save(mcs_inter_cv, file = paste0(str_path, "/", mcs_inter_cv))
+save(mcs_inter_cv, file = paste0(str_path, "/mcs_inter_cv.RData"))
 rm(mcs_inter_cv)
 
 mcs_inter_rcv <- mcs_inter %>% 
@@ -332,7 +332,7 @@ mcs_inter_rcv <- mcs_inter %>%
   )
 
 mcs_inter_rcv$dgp$datasets <- NULL
-save(mcs_inter_rcv, file = paste0(str_path, "/", mcs_inter_rcv))
+save(mcs_inter_rcv, file = paste0(str_path, "/mcs_inter_rcv.RData"))
 rm(mcs_inter_rcv)
 
 mcs_inter_bt <- mcs_inter %>% 
@@ -353,7 +353,7 @@ mcs_inter_bt <- mcs_inter %>%
   )
 
 mcs_inter_bt$dgp$datasets <- NULL
-save(mcs_inter_bt, file = paste0(str_path, "/", mcs_inter_bt))
+save(mcs_inter_bt, file = paste0(str_path, "/mcs_inter_bt.RData"))
 rm(mcs_inter_bt)
 
 rm(mcs_inter)
@@ -389,7 +389,7 @@ mcs_neural_not <- mcs_neural %>%
   )
 
 mcs_neural_not$dgp$datasets <- NULL
-save(mcs_neural_not, file = paste0(str_path, "/", mcs_neural_not))
+save(mcs_neural_not, file = paste0(str_path, "/mcs_neural_not.RData"))
 rm(mcs_neural_not)
 
 mcs_neural_cv <- mcs_neural %>% 
@@ -410,7 +410,7 @@ mcs_neural_cv <- mcs_neural %>%
   )
 
 mcs_neural_cv$dgp$datasets <- NULL
-save(mcs_neural_cv, file = paste0(str_path, "/", mcs_neural_cv))
+save(mcs_neural_cv, file = paste0(str_path, "/mcs_neural_cv.RData"))
 rm(mcs_neural_cv)
 
 mcs_neural_rcv <- mcs_neural %>% 
@@ -431,7 +431,7 @@ mcs_neural_rcv <- mcs_neural %>%
   )
 
 mcs_neural_rcv$dgp$datasets <- NULL
-save(mcs_neural_rcv, file = paste0(str_path, "/", mcs_neural_rcv))
+save(mcs_neural_rcv, file = paste0(str_path, "/mcs_neural_rcv.RData"))
 rm(mcs_neural_rcv)
 
 mcs_neural_bt <- mcs_neural %>% 
@@ -452,7 +452,7 @@ mcs_neural_bt <- mcs_neural %>%
   )
 
 mcs_neural_bt$dgp$datasets <- NULL
-save(mcs_neural_bt, file = paste0(str_path, "/", mcs_neural_bt))
+save(mcs_neural_bt, file = paste0(str_path, "/mcs_neural_bt.RData"))
 rm(mcs_neural_bt)
 
 rm(mcs_neural)
