@@ -442,11 +442,3 @@ calc_err_approx <- function(truth, response, na.rm = TRUE){
   c(mse = MSE, bias = Bias, variance = Var)
   
 }
-
-quick_save <- function(x, folder = "Results/Data/"){
-  
-  str_x_name <- deparse(quote(x))
-  str_path <- paste0(folder, str_x_name, ".RData")
-  save(x, file = str_path)
-  
-}

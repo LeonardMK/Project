@@ -74,7 +74,7 @@ print.mcs <- function(mcs_obj){
 # Run MCS function. Allows for parallel execution
 run_simulation.mcs <- function(mcs_obj, seed, samples = NULL, N = NULL, 
                                workers = 1, globals = TRUE, ...){
-
+  
   # Create datasets if not already present
   if (length(mcs_obj$dgp$datasets) == 0) {
     mcs_obj$dgp <- mcs_obj$dgp %>% run_simulation(seed, samples, N)
@@ -102,11 +102,7 @@ run_simulation.mcs <- function(mcs_obj, seed, samples = NULL, N = NULL,
     
   } else if (workers > 1) {
     
-    if (Sys.info()["sysname"] == "Windows") {
-      plan(multisession, workers = workers)
-    } else {
-      plan(multicore, workers = workers)
-    }
+    plan(multisession, workers = workers)
     
     list_estimates <- future_map(mcs_obj$dgp$datasets, function(dataset){
       
