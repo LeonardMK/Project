@@ -2,6 +2,7 @@ library(DoubleML)
 library(magrittr)
 library(mlr3verse)
 library(tidyverse)
+library(stargazer)
 
 source("Code/DGP class.R")
 source("Code/DGP functions.R")
@@ -15,7 +16,7 @@ source("Code/Utils.R")
 set.seed(4)
 int_dim <- 30
 int_N <- 10000
-int_samples <- 1000
+int_samples <- 500
 vec_beta <- runif(int_dim, -1, 1)
 vec_beta_sparse <- vec_beta
 vec_beta_sparse[sample(x = c(TRUE, FALSE), size = int_dim, replace = TRUE, prob = c(0.9, 0.1))] <- 0
@@ -26,6 +27,11 @@ vec_mu <- rep(0, int_dim)
 mat_A <- matrix(runif(int_dim ^ 2, -1, 1), ncol = int_dim)
 mat_Sigma <- cov2cor(t(mat_A) %*% mat_A)
 solve(mat_Sigma) # Is invertible
+
+# Create weight matrix for neural network
+int_hidden_units <- 5
+mat_alpha_g <- matrix(runif(int_dim * int_hidden_units, -1, 1), nrow = int_dim)
+mat_alpha_m <- matrix(runif(int_dim * int_hidden_units, -1, 1), nrow = int_dim)
 
 # Investigating Signal to Noise Ratio
 df_X <- data.frame(MASS::mvrnorm(int_N, vec_mu, mat_Sigma))
@@ -50,10 +56,11 @@ g_poly <- dgp_poly(df_X, vec_E, 2, type = "regression", factor_signal = 0.048) -
 var(g_poly) / var_E
 fac_g_poly <- 0.048
 
-g_nnet <- dgp_nnet(X = df_X, E = vec_E, hidden_units = 5, type = "regression", 
-                   factor_signal = 0.96) - vec_E
+g_nnet <- dgp_nnet(X = df_X, E = vec_E, hidden_units = int_hidden_units, 
+                   type = "regression", alpha = mat_alpha_g, 
+                   factor_signal = 2.95) - vec_E
 var(g_nnet) / var_E
-fac_g_nnet <- 0.96
+fac_g_nnet <- 2.95
 
 # Repeat for classification task
 # Also want a 50% share of treated
@@ -93,20 +100,19 @@ rbinom(int_N, 1, sigmoid(m_poly + vec_U - 1.1)) %>% table()
 scale_m_poly <- -1.1
 
 # Neural Net
-int_hidden_units <- 5
-dbl_beta_0 <- -3
-
-m_nnet <- dgp_nnet(df_X, vec_U, type = "classification", 
-                   beta_0 = dbl_beta_0, factor_signal = 0.96) %>% 
+dbl_beta_0 <- -3.05
+m_nnet <- dgp_nnet(df_X, vec_U, int_hidden_units, type = "classification",
+                   alpha = mat_alpha_m, beta_0 = dbl_beta_0,
+                   factor_signal = 2.7) %>% 
   sigmoid(inverse = TRUE) %>% 
   subtract(vec_U)
 var(m_nnet) / var_U
 
-fac_m_nnet <- 0.96
+fac_m_nnet <- 2.7
 rbinom(int_N, 1, sigmoid(m_nnet + vec_U)) %>% table()
 
 # Define sample sizes
-vec_N <- c(50, 100, 400, 800, 1600)
+vec_N <- c(50, 100, 400, 1600)
 
 # Sparse Matrix
 sparse <- dgp() %>% 
@@ -230,8 +236,8 @@ neural <- dgp() %>%
     formulas = Y ~ theta * D + g(X, E), 
     theta = 0.6,
     g = function(X, E){ 
-      dgp_nnet(X, E, hidden_units = 5, type = "regression", 
-               factor_signal = fac_g_nnet)},
+      dgp_nnet(X, E, hidden_units = int_hidden_units, type = "regression", 
+               alpha = mat_alpha_g, factor_signal = fac_g_nnet)},
     X = MASS::mvrnorm(N, mu = vec_mu, Sigma = mat_Sigma),
     E = rnorm(N, 0, sd_E)
   ) %>% 
@@ -239,8 +245,8 @@ neural <- dgp() %>%
     formulas = D ~ m(X, U),
     m = function(X, U){
       Prob_D <- dgp_nnet(
-        X, U, hidden_units = 5, type = "classification",
-        beta_0 = dbl_beta_0, factor_signal = fac_m_nnet)
+        X, U, hidden_units = int_hidden_units, type = "classification",
+        alpha = mat_alpha_m, beta_0 = dbl_beta_0, factor_signal = fac_m_nnet)
       D <- rbinom(nrow(X), 1, Prob_D)
       cbind(D = D, Prob_D = as.vector(Prob_D))
     },
@@ -262,3 +268,34 @@ neural <- neural %>%
 
 save(neural, file = "Data/neural.RData")
 rm(neural)
+
+# Export all relevant vectors
+vec_names <- paste0("X ", 1:30)
+df_Sigma <- as.data.frame(mat_Sigma)
+rownames(df_Sigma) <- vec_names
+colnames(df_Sigma) <- vec_names
+df_beta_gamma <- cbind.data.frame(
+  beta = vec_beta,
+  beta_sparse = vec_beta_sparse,
+  gamma = vec_gamma,
+  gamma_sparse = vec_gamma_sparse
+)
+rownames(df_beta_gamma) <- vec_names
+
+df_alpha_g <- as.data.frame(mat_alpha_g)
+df_alpha_m <- as.data.frame(mat_alpha_m)
+
+rownames(df_alpha_g) <- vec_names
+colnames(df_alpha_g) <- paste0("Z", 1:int_hidden_units)
+rownames(df_alpha_m) <- vec_names
+rownames(df_alpha_m) <- paste0("Z", 1:int_hidden_units)
+
+# Export everything
+stargazer(df_Sigma, type = "latex", summary = FALSE,
+          out = "Results/Tables/Simulation Data/Covariance.tex")
+stargazer(df_beta_gamma, type = "latex", summary = FALSE,
+          out = "Results/Tables/Simulation Data/Coefficients.tex")
+stargazer(df_alpha_g, type = "latex", summary = FALSE,
+          out = "Results/Tables/Simulation Data/NNet weights g.tex")
+stargazer(df_alpha_m, type = "latex", summary = FALSE,
+          out = "Results/Tables/Simulation Data/NNet weights m.tex")

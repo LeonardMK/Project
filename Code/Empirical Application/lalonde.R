@@ -42,6 +42,10 @@ list_tune_settings <- list(
 # Load Parameterspaces
 source("Code/Definition Parameter Space.R")
 
+# Adapt mtry of random forests
+list_parameterspace$ranger$ml_g$params$mtry$upper <- length(vec_X_cols)
+list_parameterspace$ranger$ml_m$params$mtry$upper <- length(vec_X_cols)
+
 # Want to get the same partitioning for all estimators.
 int_folds <- 5
 int_repeats <- 3
@@ -71,7 +75,7 @@ plan("multisession", workers = 3)
 
 list_plr <- df_grid_lrns %>% 
   future_pmap(function(ml_g, ml_m){
-    browser()
+    
     lrn_g <- lrn(ml_g)
     lrn_m <- lrn(ml_m)
     
