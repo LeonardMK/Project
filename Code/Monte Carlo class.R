@@ -80,48 +80,27 @@ run_simulation.mcs <- function(mcs_obj, seed, samples = NULL, N = NULL,
     mcs_obj$dgp <- mcs_obj$dgp %>% run_simulation(seed, samples, N)
   }
   
-  if (workers == 1) {
+  if (workers > 1) {
+    plan(multisession, workers = workers)
+  }
+  
+  pbar <- progress::progress_bar$new(
+    format = "Calculating [:bar] :percent eta: :eta",
+    total = length(mcs_obj$dgp$datasets),
+    clear = FALSE,
+  )
+  
+  list_estimates <- map(mcs_obj$dgp$datasets, function(dataset){
     
-    pbar <- progress::progress_bar$new(
-      format = "Calculating [:bar] :percent eta: :eta",
-      total = length(mcs_obj$dgp$datasets),
-      clear = FALSE,
+    pbar$tick()
+    
+    list(
+      Output = mcs_obj$estimator(dataset$data, ...), 
+      N = dataset$N, 
+      Sample = dataset$Sample
     )
     
-    list_estimates <- map(mcs_obj$dgp$datasets, function(dataset){
-      
-      pbar$tick()
-      
-      list(
-        Output = mcs_obj$estimator(dataset$data, ...), 
-        N = dataset$N, 
-        Sample = dataset$Sample
-      )
-      
-    })
-    
-  } else if (workers > 1) {
-    
-    plan(multisession, workers = workers)
-    
-    list_estimates <- future_map(mcs_obj$dgp$datasets, function(dataset){
-      
-      list(
-        Output = mcs_obj$estimator(dataset$data, ...), 
-        N = dataset$N, 
-        Sample = dataset$Sample
-      )
-    }, 
-    .options = furrr_options(
-      globals = globals,
-      packages = sessionInfo() %>% pluck("otherPkgs") %>% names(), 
-      seed = seed
-    ),
-    .progress = TRUE)
-    
-  } else {
-    stop("'workers' has to be a positive integer.")
-  }
+  })
   # Keep estimates in whatever form. This allows for more flexibility
   names(list_estimates) <- mcs_obj$dgp$datasets %>% names()
   mcs_obj$results <- list_estimates

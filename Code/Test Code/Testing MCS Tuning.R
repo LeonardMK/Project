@@ -30,24 +30,10 @@ trm_combo <- trm("combo",
                  )
 )
 
-list_tune_settings_cv <- list(
-  terminator = trm_combo,
-  algorithm = tnr("random_search"),
-  rsmp_tune = rsmp("cv", folds = 5),
-  measure = list(ml_g = msr("regr.mse"), ml_m = msr("classif.logloss"))
-)
-
 list_tune_settings_rcv <- list(
   terminator = trm_combo,
   algorithm = tnr("random_search"),
   rsmp_tune = rsmp("repeated_cv", folds = 5, repeats = 3),
-  measure = list(ml_g = msr("regr.mse"), ml_m = msr("classif.logloss"))
-)
-
-list_tune_settings_bt <- list(
-  terminator = trm_combo,
-  algorithm = tnr("random_search"),
-  rsmp_tune = rsmp("bootstrap", repeats = 30),
   measure = list(ml_g = msr("regr.mse"), ml_m = msr("classif.logloss"))
 )
 
@@ -68,7 +54,7 @@ list_globals = list(
 
 load("Data/Sparse.RData")
 
-sparse <- sparse %>% subset(N = c(50, 100, 400), Samples = 1:2)
+sparse <- sparse %>% subset(N = c(50, 100, 400, 1600), Samples = 1:2)
 mcs_sparse <- mcs(dml_estimator, sparse)
 
 # Remove sparse to keep working memory ready
@@ -94,27 +80,6 @@ mcs_sparse_not$dgp$datasets <- NULL
 save(mcs_sparse_not, file = paste0(str_path, "/mcs_sparse_not.RData"))
 rm(mcs_sparse_not)
 
-mcs_sparse_cv <- mcs_sparse %>% 
-  run_simulation(
-    seed = 10, 
-    workers = int_cores,
-    x_cols = vec_X_cols,
-    d_cols = vec_D_col,
-    y_col = vec_Y_col,
-    ml_g = vec_ml_g,
-    ml_m = vec_ml_m,
-    tune = TRUE,
-    rsmp_key = "cv",
-    rsmp_args = list(folds = 5),
-    par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_cv,
-    list_globals = list_globals,
-  )
-
-mcs_sparse_cv$dgp$datasets <- NULL
-save(mcs_sparse_cv, file = paste0(str_path, "/mcs_sparse_cv.RData"))
-rm(mcs_sparse_cv)
-
 mcs_sparse_rcv <- mcs_sparse %>% 
   run_simulation(
     seed = 10, 
@@ -136,27 +101,6 @@ mcs_sparse_rcv$dgp$datasets <- NULL
 save(mcs_sparse_rcv, file = paste0(str_path, "/mcs_sparse_rcv.RData"))
 rm(mcs_sparse_rcv)
 
-mcs_sparse_bt <- mcs_sparse %>% 
-  run_simulation(
-    seed = 10, 
-    workers = int_cores,
-    x_cols = vec_X_cols,
-    d_cols = vec_D_col,
-    y_col = vec_Y_col,
-    ml_g = vec_ml_g,
-    ml_m = vec_ml_m,
-    tune = TRUE,
-    rsmp_key = "cv",
-    rsmp_args = list(folds = 5),
-    par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_bt,
-    list_globals = list_globals,
-  )
-
-mcs_sparse_bt$dgp$datasets <- NULL
-save(mcs_sparse_bt, file = paste0(str_path, "/mcs_sparse_bt.RData"))
-rm(mcs_sparse_bt)
-
 rm(mcs_sparse)
 
 # Sparse Analysis ---------------------------------------------------------
@@ -166,7 +110,7 @@ rm(mcs_sparse)
 
 load("Data/Sine.RData")
 
-sine <- sine %>% subset(N = c(50, 100, 400), Samples = 1:2)
+sine <- sine %>% subset(N = c(50, 100, 400, 1600), Samples = 1:2)
 
 mcs_sine <- mcs(dml_estimator, sine)
 
@@ -193,27 +137,6 @@ mcs_sine_not$dgp$datasets <- NULL
 save(mcs_sine_not, file = paste0(str_path, "/mcs_sine_not.RData"))
 rm(mcs_sine_not)
 
-mcs_sine_cv <- mcs_sine %>% 
-  run_simulation(
-    seed = 10, 
-    workers = int_cores,
-    x_cols = vec_X_cols,
-    d_cols = vec_D_col,
-    y_col = vec_Y_col,
-    ml_g = vec_ml_g,
-    ml_m = vec_ml_m,
-    tune = TRUE,
-    rsmp_key = "cv",
-    rsmp_args = list(folds = 5),
-    par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_cv,
-    list_globals = list_globals,
-  )
-
-mcs_sine_cv$dgp$datasets <- NULL
-save(mcs_sine_cv, file = paste0(str_path, "/mcs_sine_cv.RData"))
-rm(mcs_sine_cv)
-
 mcs_sine_rcv <- mcs_sine %>% 
   run_simulation(
     seed = 10, 
@@ -235,27 +158,6 @@ mcs_sine_rcv$dgp$datasets <- NULL
 save(mcs_sine_rcv, file = paste0(str_path, "/mcs_sine_rcv.RData"))
 rm(mcs_sine_rcv)
 
-mcs_sine_bt <- mcs_sine %>% 
-  run_simulation(
-    seed = 10, 
-    workers = int_cores,
-    x_cols = vec_X_cols,
-    d_cols = vec_D_col,
-    y_col = vec_Y_col,
-    ml_g = vec_ml_g,
-    ml_m = vec_ml_m,
-    tune = TRUE,
-    rsmp_key = "cv",
-    rsmp_args = list(folds = 5),
-    par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_bt,
-    list_globals = list_globals,
-  )
-
-mcs_sine_bt$dgp$datasets <- NULL
-save(mcs_sine_bt, file = paste0(str_path, "/mcs_sine_bt.RData"))
-rm(mcs_sine_bt)
-
 rm(mcs_sine)
 
 # Sine Analysis -----------------------------------------------------------
@@ -266,7 +168,7 @@ rm(mcs_sine)
 
 load("Data/Inter.RData")
 
-inter <- inter %>% subset(N = c(50, 100, 400), Samples = 1:2)
+inter <- inter %>% subset(N = c(50, 100, 400, 1600), Samples = 1:2)
 
 mcs_inter <- mcs(dml_estimator, inter)
 
@@ -293,27 +195,6 @@ mcs_inter_not$dgp$datasets <- NULL
 save(mcs_inter_not, file = paste0(str_path, "/mcs_inter_not.RData"))
 rm(mcs_inter_not)
 
-mcs_inter_cv <- mcs_inter %>% 
-  run_simulation(
-    seed = 10, 
-    workers = int_cores,
-    x_cols = vec_X_cols,
-    d_cols = vec_D_col,
-    y_col = vec_Y_col,
-    ml_g = vec_ml_g,
-    ml_m = vec_ml_m,
-    tune = TRUE,
-    rsmp_key = "cv",
-    rsmp_args = list(folds = 5),
-    par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_cv,
-    list_globals = list_globals,
-  )
-
-mcs_inter_cv$dgp$datasets <- NULL
-save(mcs_inter_cv, file = paste0(str_path, "/mcs_inter_cv.RData"))
-rm(mcs_inter_cv)
-
 mcs_inter_rcv <- mcs_inter %>% 
   run_simulation(
     seed = 10, 
@@ -335,27 +216,6 @@ mcs_inter_rcv$dgp$datasets <- NULL
 save(mcs_inter_rcv, file = paste0(str_path, "/mcs_inter_rcv.RData"))
 rm(mcs_inter_rcv)
 
-mcs_inter_bt <- mcs_inter %>% 
-  run_simulation(
-    seed = 10, 
-    workers = int_cores,
-    x_cols = vec_X_cols,
-    d_cols = vec_D_col,
-    y_col = vec_Y_col,
-    ml_g = vec_ml_g,
-    ml_m = vec_ml_m,
-    tune = TRUE,
-    rsmp_key = "cv",
-    rsmp_args = list(folds = 5),
-    par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_bt,
-    list_globals = list_globals,
-  )
-
-mcs_inter_bt$dgp$datasets <- NULL
-save(mcs_inter_bt, file = paste0(str_path, "/mcs_inter_bt.RData"))
-rm(mcs_inter_bt)
-
 rm(mcs_inter)
 
 # Polynomial Interaction Analysis -----------------------------------------
@@ -365,7 +225,7 @@ rm(mcs_inter)
 
 load("Data/Neural.RData")
 
-neural <- neural %>% samples(N = c(50, 100, 400), Samples = 1:2)
+neural <- neural %>% samples(N = c(50, 100, 400, 1600), Samples = 1:2)
 
 mcs_neural <- mcs(dml_estimator, neural)
 
@@ -392,27 +252,6 @@ mcs_neural_not$dgp$datasets <- NULL
 save(mcs_neural_not, file = paste0(str_path, "/mcs_neural_not.RData"))
 rm(mcs_neural_not)
 
-mcs_neural_cv <- mcs_neural %>% 
-  run_simulation(
-    seed = 10, 
-    workers = int_cores,
-    x_cols = vec_X_cols,
-    d_cols = vec_D_col,
-    y_col = vec_Y_col,
-    ml_g = vec_ml_g,
-    ml_m = vec_ml_m,
-    tune = TRUE,
-    rsmp_key = "cv",
-    rsmp_args = list(folds = 5),
-    par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_cv,
-    list_globals = list_globals,
-  )
-
-mcs_neural_cv$dgp$datasets <- NULL
-save(mcs_neural_cv, file = paste0(str_path, "/mcs_neural_cv.RData"))
-rm(mcs_neural_cv)
-
 mcs_neural_rcv <- mcs_neural %>% 
   run_simulation(
     seed = 10, 
@@ -433,27 +272,6 @@ mcs_neural_rcv <- mcs_neural %>%
 mcs_neural_rcv$dgp$datasets <- NULL
 save(mcs_neural_rcv, file = paste0(str_path, "/mcs_neural_rcv.RData"))
 rm(mcs_neural_rcv)
-
-mcs_neural_bt <- mcs_neural %>% 
-  run_simulation(
-    seed = 10, 
-    workers = int_cores,
-    x_cols = vec_X_cols,
-    d_cols = vec_D_col,
-    y_col = vec_Y_col,
-    ml_g = vec_ml_g,
-    ml_m = vec_ml_m,
-    tune = TRUE,
-    rsmp_key = "cv",
-    rsmp_args = list(folds = 5),
-    par_grids = list_parameterspace,
-    tune_settings = list_tune_settings_bt,
-    list_globals = list_globals,
-  )
-
-mcs_neural_bt$dgp$datasets <- NULL
-save(mcs_neural_bt, file = paste0(str_path, "/mcs_neural_bt.RData"))
-rm(mcs_neural_bt)
 
 rm(mcs_neural)
 

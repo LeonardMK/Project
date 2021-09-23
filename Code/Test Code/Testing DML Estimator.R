@@ -61,6 +61,8 @@ list_globals = list(
   msr_validation_set = msr_validation_set
 )
 
+plan(multisession, workers = 3)
+
 dml_no_cf_no_tune <- dml_estimator(
   dataset = df_neural, x_cols = paste0("X.", 1:30), y_col = "Y", d_cols = "D", 
   ml_g = vec_ml_g, 

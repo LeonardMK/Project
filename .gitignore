@@ -4,4 +4,5 @@
 *.RData
 *.csv
 *.xlsx
+.Rhistory
 .Rproj.user
