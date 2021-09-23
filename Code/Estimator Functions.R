@@ -545,8 +545,13 @@ dml_estimator <- function(
     mutate(
       ml_g = rep(ml_g, each = if_else(int_repeats == 1, 1, 2)),
       ml_m = rep(ml_m, each = if_else(int_repeats == 1, 1, 2)),
-    ) %>% 
-    cbind(time_tuning = rep(df_time$time_tuning, each = 2))
+    )
+  
+  if (int_repeats > 1) {
+    df_estimates$time_tuning <- rep(time_tuning = rep(df_time$time_tuning, each = 2))
+  } else {
+    df_estimates$time_tuning <- df_time$time_tuning
+  }
   
   # A list containing lists with specifications and predictions
   list_settings_all <- list_tuning %>% 
