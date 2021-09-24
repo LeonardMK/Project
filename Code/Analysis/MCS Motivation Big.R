@@ -47,7 +47,7 @@ list_globals = list(
 # No sample splitting
 load("Data/Sparse.RData")
 
-sparse <- sparse %>% subset(N = c(50, 100, 400, 1600), Samples = 1:200)
+sparse <- sparse %>% subset(N = c(1600), Samples = 1:200)
 
 mcs_sparse <- mcs(dml_estimator, sparse)
 
@@ -73,7 +73,7 @@ mcs_sparse_naive <- mcs_sparse %>%
   )
 
 mcs_sparse_naive$dgp$datasets <- NULL
-save(mcs_sparse_naive, file = paste0(str_path, "/mcs_sparse_naive.RData"))
+save(mcs_sparse_naive, file = paste0(str_path, "/mcs_sparse_naive_big.RData"))
 rm(mcs_sparse_naive)
 
 mcs_sparse_non_orth <- mcs_sparse %>% 
@@ -94,7 +94,7 @@ mcs_sparse_non_orth <- mcs_sparse %>%
   )
 
 mcs_sparse_non_orth$dgp$datasets <- NULL
-save(mcs_sparse_non_orth, file = paste0(str_path, "/mcs_sparse_non_orth.RData"))
+save(mcs_sparse_non_orth, file = paste0(str_path, "/mcs_sparse_non_orth_big.RData"))
 rm(mcs_sparse_non_orth)
 
 mcs_sparse_non_cf <- mcs_sparse %>% 
@@ -115,7 +115,7 @@ mcs_sparse_non_cf <- mcs_sparse %>%
   )
 
 mcs_sparse_non_cf$dgp$datasets <- NULL
-save(mcs_sparse_non_cf, file = paste0(str_path, "/mcs_sparse_non_cf.RData"))
+save(mcs_sparse_non_cf, file = paste0(str_path, "/mcs_sparse_non_cf_big.RData"))
 rm(mcs_sparse_non_cf)
 
 mcs_sparse_dml <- mcs_sparse %>% 
@@ -135,7 +135,7 @@ mcs_sparse_dml <- mcs_sparse %>%
   )
 
 mcs_sparse_dml$dgp$datasets <- NULL
-save(mcs_sparse_dml, file = paste0(str_path, "/mcs_sparse_dml.RData"))
+save(mcs_sparse_dml, file = paste0(str_path, "/mcs_sparse_dml_big.RData"))
 rm(mcs_sparse_dml)
 
 rm(mcs_sparse)
@@ -147,7 +147,7 @@ rm(mcs_sparse)
 
 load("Data/Sine.RData")
 
-sine <- sine %>% subset(N = c(50, 100, 400, 1600), Samples = 1:200)
+sine <- sine %>% subset(N = c(1600), Samples = 1:200)
 
 mcs_sine <- mcs(dml_estimator, sine)
 
@@ -173,7 +173,7 @@ mcs_sine_naive <- mcs_sine %>%
   )
 
 mcs_sine_naive$dgp$datasets <- NULL
-save(mcs_sine_naive, file = paste0(str_path, "/mcs_sine_naive.RData"))
+save(mcs_sine_naive, file = paste0(str_path, "/mcs_sine_naive_big.RData"))
 rm(mcs_sine_naive)
 
 mcs_sine_non_orth <- mcs_sine %>% 
@@ -194,7 +194,7 @@ mcs_sine_non_orth <- mcs_sine %>%
   )
 
 mcs_sine_non_orth$dgp$datasets <- NULL
-save(mcs_sine_non_orth, file = paste0(str_path, "/mcs_sine_non_orth.RData"))
+save(mcs_sine_non_orth, file = paste0(str_path, "/mcs_sine_non_orth_big.RData"))
 rm(mcs_sine_non_orth)
 
 mcs_sine_non_cf <- mcs_sine %>% 
@@ -215,7 +215,7 @@ mcs_sine_non_cf <- mcs_sine %>%
   )
 
 mcs_sine_non_cf$dgp$datasets <- NULL
-save(mcs_sine_non_cf, file = paste0(str_path, "/mcs_sine_non_cf.RData"))
+save(mcs_sine_non_cf, file = paste0(str_path, "/mcs_sine_non_cf_big.RData"))
 rm(mcs_sine_non_cf)
 
 mcs_sine_dml <- mcs_sine %>% 
@@ -235,7 +235,7 @@ mcs_sine_dml <- mcs_sine %>%
   )
 
 mcs_sine_dml$dgp$datasets <- NULL
-save(mcs_sine_dml, file = paste0(str_path, "/mcs_sine_dml.RData"))
+save(mcs_sine_dml, file = paste0(str_path, "/mcs_sine_dml_big.RData"))
 rm(mcs_sine_dml)
 
 rm(mcs_sine)
@@ -249,7 +249,7 @@ rm(mcs_sine)
 
 load("Data/Inter.RData")
 
-inter <- inter %>% subset(N = c(50, 100, 400, 1600), Samples = 1:200)
+inter <- inter %>% subset(N = c(1600), Samples = 1:200)
 
 mcs_inter <- mcs(dml_estimator, inter)
 
@@ -275,7 +275,7 @@ mcs_inter_naive <- mcs_inter %>%
   )
 
 mcs_inter_naive$dgp$datasets <- NULL
-save(mcs_inter_naive, file = paste0(str_path, "/mcs_inter_naive.RData"))
+save(mcs_inter_naive, file = paste0(str_path, "/mcs_inter_naive_big.RData"))
 rm(mcs_inter_naive)
 
 mcs_inter_non_orth <- mcs_inter %>% 
@@ -296,7 +296,7 @@ mcs_inter_non_orth <- mcs_inter %>%
   )
 
 mcs_inter_non_orth$dgp$datasets <- NULL
-save(mcs_inter_non_orth, file = paste0(str_path, "/mcs_inter_non_orth.RData"))
+save(mcs_inter_non_orth, file = paste0(str_path, "/mcs_inter_non_orth_big.RData"))
 rm(mcs_inter_non_orth)
 
 mcs_inter_non_cf <- mcs_inter %>% 
@@ -317,7 +317,7 @@ mcs_inter_non_cf <- mcs_inter %>%
   )
 
 mcs_inter_non_cf$dgp$datasets <- NULL
-save(mcs_inter_non_cf, file = paste0(str_path, "/mcs_inter_non_cf.RData"))
+save(mcs_inter_non_cf, file = paste0(str_path, "/mcs_inter_non_cf_big.RData"))
 rm(mcs_inter_non_cf)
 
 mcs_inter_dml <- mcs_inter %>% 
@@ -337,7 +337,7 @@ mcs_inter_dml <- mcs_inter %>%
   )
 
 mcs_inter_dml$dgp$datasets <- NULL
-save(mcs_inter_dml, file = paste0(str_path, "/mcs_inter_dml.RData"))
+save(mcs_inter_dml, file = paste0(str_path, "/mcs_inter_dml_big.RData"))
 rm(mcs_inter_dml)
 
 rm(mcs_inter)
@@ -350,7 +350,7 @@ rm(mcs_inter)
 
 load("Data/Neural.RData")
 
-neural <- neural %>% subset(N = c(50, 100, 400, 1600), Samples = 1:200)
+neural <- neural %>% subset(N = c(1600), Samples = 1:200)
 
 mcs_neural <- mcs(dml_estimator, neural)
 
@@ -376,7 +376,7 @@ mcs_neural_naive <- mcs_neural %>%
   )
 
 mcs_neural_naive$dgp$datasets <- NULL
-save(mcs_neural_naive, file = paste0(str_path, "/mcs_neural_naive.RData"))
+save(mcs_neural_naive, file = paste0(str_path, "/mcs_neural_naive_big.RData"))
 rm(mcs_neural_naive)
 
 mcs_neural_non_orth <- mcs_neural %>% 
@@ -397,7 +397,7 @@ mcs_neural_non_orth <- mcs_neural %>%
   )
 
 mcs_neural_non_orth$dgp$datasets <- NULL
-save(mcs_neural_non_orth, file = paste0(str_path, "/mcs_neural_non_orth.RData"))
+save(mcs_neural_non_orth, file = paste0(str_path, "/mcs_neural_non_orth_big.RData"))
 rm(mcs_neural_non_orth)
 
 mcs_neural_non_cf <- mcs_neural %>% 
@@ -418,7 +418,7 @@ mcs_neural_non_cf <- mcs_neural %>%
   )
 
 mcs_neural_non_cf$dgp$datasets <- NULL
-save(mcs_neural_non_cf, file = paste0(str_path, "/mcs_neural_non_cf.RData"))
+save(mcs_neural_non_cf, file = paste0(str_path, "/mcs_neural_non_cf_big.RData"))
 rm(mcs_neural_non_cf)
 
 mcs_neural_dml <- mcs_neural %>% 
@@ -438,7 +438,7 @@ mcs_neural_dml <- mcs_neural %>%
   )
 
 mcs_neural_dml$dgp$datasets <- NULL
-save(mcs_neural_dml, file = paste0(str_path, "/mcs_neural_dml.RData"))
+save(mcs_neural_dml, file = paste0(str_path, "/mcs_neural_dml_big.RData"))
 rm(mcs_neural_dml)
 
 rm(mcs_neural)

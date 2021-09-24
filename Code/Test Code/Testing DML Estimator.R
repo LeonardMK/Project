@@ -13,18 +13,6 @@ df_neural <- neural$datasets$`Sample = 1 with N = 400`$data
 rm(neural)
 
 # Setting up Parameters
-list_tune_settings_cv <- list(
-  terminator = trm("combo", 
-                   list(
-                     trm("evals", n_evals = 10), 
-                     trm("stagnation", iters = 5)
-                   )
-  ),
-  algorithm = tnr("random_search"),
-  rsmp_tune = rsmp("cv", folds = 5),
-  measure = list(ml_g = msr("regr.mse"), ml_m = msr("classif.logloss"))
-)
-
 list_tune_settings_rcv <- list(
   terminator = trm("combo", 
                    list(
@@ -34,18 +22,6 @@ list_tune_settings_rcv <- list(
   ),
   algorithm = tnr("random_search"),
   rsmp_tune = rsmp("repeated_cv", folds = 5, repeats = 3),
-  measure = list(ml_g = msr("regr.mse"), ml_m = msr("classif.logloss"))
-)
-
-list_tune_settings_bt <- list(
-  terminator = trm("combo", 
-                   list(
-                     trm("evals", n_evals = 10), 
-                     trm("stagnation", iters = 5)
-                   )
-  ),
-  algorithm = tnr("random_search"),
-  rsmp_tune = rsmp("bootstrap"),
   measure = list(ml_g = msr("regr.mse"), ml_m = msr("classif.logloss"))
 )
 
@@ -61,12 +37,14 @@ list_globals = list(
   msr_validation_set = msr_validation_set
 )
 
+plan(multisession, workers = parallel::detectCores())
+
 dml_no_cf_no_tune <- dml_estimator(
   dataset = df_neural, x_cols = paste0("X.", 1:30), y_col = "Y", d_cols = "D", 
   ml_g = vec_ml_g, 
   ml_m = vec_ml_m, 
   tune = FALSE, 
-  tune_settings = list_tune_settings_cv,
+  tune_settings = list_tune_settings_rcv,
   par_grids = list_parameterspace, 
   rsmp_key = "no_cf",
   list_globals = list_globals
@@ -77,7 +55,7 @@ dml_no_cf_tune <- dml_estimator(
   ml_g = vec_ml_g, 
   ml_m = vec_ml_m, 
   tune = TRUE, 
-  tune_settings = list_tune_settings_cv,
+  tune_settings = list_tune_settings_rcv,
   par_grids = list_parameterspace, 
   rsmp_key = "no_cf",
   list_globals = list_globals
@@ -91,7 +69,7 @@ dml_no_cf_tune_non_orth <- dml_estimator(
   ml_g = vec_ml_g, 
   ml_m = vec_ml_m, 
   tune = TRUE, 
-  tune_settings = list_tune_settings_cv,
+  tune_settings = list_tune_settings_rcv,
   par_grids = list_parameterspace, 
   rsmp_key = "no_cf",
   list_globals = list_globals,
@@ -107,7 +85,7 @@ dml_cf_cv_tune <- dml_estimator(
   ml_g = vec_ml_g, 
   ml_m = vec_ml_m, 
   tune = TRUE, 
-  tune_settings = list_tune_settings_cv,
+  tune_settings = list_tune_settings_rcv,
   par_grids = list_parameterspace, 
   rsmp_key = "cv", rsmp_args = list(folds = 5),
   list_globals = list_globals
@@ -122,7 +100,7 @@ dml_cf_rcv_tune <- dml_estimator(
   ml_g = vec_ml_g, 
   ml_m = vec_ml_m, 
   tune = TRUE, 
-  tune_settings = list_tune_settings_cv,
+  tune_settings = list_tune_settings_rcv,
   par_grids = list_parameterspace, 
   rsmp_key = "repeated_cv", rsmp_args = list(folds = 5, repeats = 5),
   list_globals = list_globals
