@@ -10,7 +10,7 @@ source("Code/Monte Carlo Methods.R")
 source("Code/Utils.R")
 
 # Detect number of cores
-int_cores <- parallel::detectCores() - 1
+int_cores <- parallel::detectCores()
 str_path <- "Results/Data/"
 
 # Specify setup
