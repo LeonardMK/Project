@@ -4,5 +4,6 @@
 *.RData
 *.csv
 *.xlsx
+*.zip
 .Rhistory
 .Rproj.user

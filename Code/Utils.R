@@ -315,9 +315,18 @@ create_interactions <- function(X, order = 2){
 estimate_rate <- function(mse_data, plot = TRUE, na.rm = TRUE){
   
   # Calculate for rising N MSE_2 / MSE_1 * ()
+  if ("algorithms" %in% colnames(mse_sp_nv)) {
+    
   df_rates <- mse_data %>% 
     group_by(algorithms) %>% 
     mutate(Rate = 1 - (MSE / MSE[which(N == min(N, na.rm = na.rm))]) ^ (1 / (N / min(N, na.rm = na.rm) - 1)))
+  
+  } else {
+    
+    df_rates <- mse_data %>% 
+      mutate(Rate = 1 - (MSE / MSE[which(N == min(N, na.rm = na.rm))]) ^ (1 / (N / min(N, na.rm = na.rm) - 1)))
+    
+  }
   
   # Replace rates for smallest N with NA
   df_rates[df_rates$N == min(df_rates$N, na.rm = na.rm), "Rate"] <- NA
@@ -336,18 +345,35 @@ estimate_rate <- function(mse_data, plot = TRUE, na.rm = TRUE){
   
   if (plot) {
     
-    mse_plot <- ggplot(mse_data, aes(x = N, y = MSE, col = str_to_title(algorithms))) + 
-      geom_point() + 
-      geom_line() + 
-      theme_bw() +
-      labs(col = "Algorithms") 
-    
-    rates_plot <- ggplot(df_rates, aes(x = N, y = Rate, col = str_to_title(algorithms))) + 
-      geom_point() + 
-      geom_line() + 
-      theme_bw() +
-      labs(col = "Algorithms")
-    
+    if ("algorithms" %in% colnames(mse_sp_nv)) {
+      
+      mse_plot <- ggplot(mse_data, aes(x = N, y = MSE, col = str_to_title(algorithms))) + 
+        geom_point() + 
+        geom_line() + 
+        theme_bw() +
+        labs(col = "Algorithms") 
+      
+      rates_plot <- ggplot(df_rates, aes(x = N, y = Rate, col = str_to_title(algorithms))) + 
+        geom_point() + 
+        geom_line() + 
+        theme_bw() +
+        labs(col = "Algorithms")
+      
+    } else {
+      
+      mse_plot <- ggplot(mse_data, aes(x = N, y = MSE)) + 
+        geom_point() + 
+        geom_line() + 
+        theme_bw() +
+        labs(col = "Algorithms") 
+      
+      rates_plot <- ggplot(df_rates, aes(x = N, y = Rate)) + 
+        geom_point() + 
+        geom_line() + 
+        theme_bw() +
+        labs(col = "Algorithms")
+      
+    }
     plot_mse_rate <- ggarrange(mse_plot, rates_plot, common.legend = TRUE, legend = "right")
     
     list(rate = df_rates, rate_desc = df_rates_desc, plot = plot_mse_rate)
@@ -442,3 +468,38 @@ calc_err_approx <- function(truth, response, na.rm = TRUE){
   c(mse = MSE, bias = Bias, variance = Var)
   
 }
+
+# Function to aggregate nuisance function measures
+desc_nuis <- function(mcs_obj, by = NULL) {
+  
+  list_msrs <- map(mcs_obj$results, ~ {
+    df_msr <- .x$Output$Measures
+    df_msr %>% 
+      mutate(
+        N = .x$N,
+        Sample = .x$Sample
+      )
+    })
+  
+  df_msrs <- do.call(rbind, list_msrs)
+  
+  if (is.null(by)) {
+    by <- quote(N, fun)
+  } else {
+    by <- quote(paste0("N, fun", by))
+  }
+  
+  df_msrs <- df_msrs %>% 
+    group_by(!!by) %>% 
+    summarise(
+      across(c(mean_msr_in, mean_msr_val, mse, bias, variance), mean)
+    )
+  
+  colnames(df_msrs) <- str_to_upper(colnames(df_msrs))
+  
+  df_msrs
+  
+}
+
+# Function to calculate rate for nuisance function estimators
+

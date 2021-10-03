@@ -154,7 +154,7 @@ consistency.mcs <- function(
   df_conv <- map(epsilon, function(eps){
     
     suppressMessages({
-      df_results %>% 
+      df_results_eps <- df_results %>% 
         mutate(lgl_eps = abs_bias < eps) %>% 
         group_by(N, parameter_names, !!!by) %>% 
         summarise(Probability = mean(lgl_eps), na.rm = na.rm) %>% 
@@ -162,8 +162,17 @@ consistency.mcs <- function(
           epsilon = eps,
           N = as.factor(N),
           parameter_names = str_to_title(parameter_names),
+        )
+      
+      if (!is_empty(by)) {
+      df_results_eps %>% 
+        mutate(
           across(!!!by, str_to_title)
         )
+      }
+      
+      df_results_eps
+      
     })
     
   }) %>% map_dfr(~ .x)
@@ -480,65 +489,17 @@ distribution.mcs <- function(
     
   }))
   
+  df_seq$N <- trimws(df_seq$N)
+  df_seq$N <- factor(df_seq$N, levels = sort(vec_N))
+  df_results$N <- factor(df_results$N, levels = sort(vec_N))
+  
   # Plot is facetted by N
   ggplot(df_results, aes(x = parameter_est)) + 
     geom_histogram(stat = "density") + 
     geom_line(aes(x = x, y = pdf), data = df_seq) + 
     geom_vline(xintercept = df_results %>% pull(parameter) %>% unique(), col = "red") +
     labs(y = "Density", x = "Distribution") + 
-    facet_grid(gg_by)
-  
-}
-
-# Power function. Test how sensitive an estimator reacts to deviations from the Null.
-# This function essentially reruns a simulation for different settings of theta.
-# Calculates the probability of rejecting a certain Null hypothesis.
-# Parameters is a list with named vectors/matrices.
-# The function creates a grid of combinations
-
-power.mcs_obj <- function(
-  mcs_obj, parameters, seed, samples, N, alpha = 0.05, parallel = FALSE, workers = FALSE
-){
-  
-  # Check that all parameters present in parameters are also present in the dgp
-  if (!all(names(parameters) %in% names(mcs_obj$dgp$arguments))) {
-    vec_not_present <- names(parameters)[!(names(parameters) %in% names(mcs_obj$dgp$arguments))]
-    stop(
-      paste0(paste0(vec_not_present, collapse = ", "), " are not present in the 'dgp'. Set before running 'power.mcs'.")
-    )
-  }
-  
-  vec_not_vector_lgl <- map_lgl(parameters, is_vector)
-  
-  if (!all(vec_not_vector_lgl)) {
-    vec_not_vector <- names(parameters)[vec_not_vector_lgl]
-    stop(
-      paste0(
-        paste0(vec_not_vector, collapse = ", "), 
-        ifelse(length(vec_not_vector) == 1, " is ", " are "),
-        "not of type vector respectively matrix."
-      )
-    )
-  }
-  
-  # Create a grid of specifications
-  
-  # For all Theta in seq(Theta_low, Theta_start) do the following
-  list_results <- map_dbl(parameters, function(parameter){
-    
-    # Set datasets to an empty list
-    mcs_obj$dgp$datasets <- list()
-    
-    # 1. Set values in the mcs obj's dgp
-    mcs_obj$dgp %>% set_arguments()
-    
-    # 2. Simulate data for a given Theta value.
-    mcs_obj$dgp <- mcs_obj$dgp %>% set_attributes(parameter)
-    # 3. Calculate estimator and get Theta Hat plus Confidence Bands.
-    # 4. For a given simulation calculate the probability of Theta_0 being within the CIs
-    
-    
-  })
+    facet_grid(gg_by, scales = "free")
   
 }
 
@@ -654,16 +615,33 @@ cov_prob.mcs <- function(mcs_obj, parameter_names = "theta", alpha = c(0.1, 0.05
   
   if (plot) {
     
-    cov_prob_plot <- ggplot(
-      data = df_cov_prob, 
-      mapping = aes(x = N, y = `Cov. Prob.`, col = `Width of CI`, shape = eval(by[[1]]))) + 
-      geom_point(alpha = 0.3) + 
-      geom_errorbar(aes(ymin = `Lower 95%`, ymax = `Upper 95%`)) + 
-      geom_hline(aes(yintercept = as.numeric(str_remove(`Type of CI`, "% CI$"))), linetype = "dashed") + 
-      labs(y = "Coverage Probability", x = "Sample Size", shape = str_to_title(as.character(by[[1]]))) + 
-      facet_grid(eval(by[[1]]) ~ `Type of CI`) + 
-      theme_bw() + 
-      scale_color_continuous(type = "viridis")
+    if (!is_empty(by)) {
+      
+      cov_prob_plot <- ggplot(
+        data = df_cov_prob, 
+        mapping = aes(x = N, y = `Cov. Prob.`, col = `Width of CI`, shape = `Type of CI`)) + 
+        geom_point(alpha = 0.3) + 
+        geom_errorbar(aes(ymin = `Lower 95%`, ymax = `Upper 95%`)) + 
+        geom_hline(aes(yintercept = as.numeric(str_remove(`Type of CI`, "% CI$"))), linetype = "dashed") + 
+        labs(y = "Coverage Probability", x = "Sample Size", shape = str_to_title(as.character(by[[1]]))) + 
+        theme_bw() + 
+        scale_color_continuous(type = "viridis") +  
+        facet_grid(eval(by[[1]]) ~ `Type of CI`)
+      
+    } else {
+      
+      cov_prob_plot <- ggplot(
+        data = df_cov_prob, 
+        mapping = aes(x = N, y = `Cov. Prob.`, col = `Width of CI`)) + 
+        geom_point(alpha = 0.3) + 
+        geom_errorbar(aes(ymin = `Lower 95%`, ymax = `Upper 95%`)) + 
+        geom_hline(aes(yintercept = as.numeric(str_remove(`Type of CI`, "% CI$"))), linetype = "dashed") + 
+        labs(y = "Coverage Probability", x = "Sample Size") + 
+        theme_bw() + 
+        scale_color_continuous(type = "viridis") + 
+        facet_grid(~ `Type of CI`)
+      
+    }
     
     list(data = df_cov_prob, plot = cov_prob_plot)
     
@@ -677,10 +655,17 @@ cov_prob.mcs <- function(mcs_obj, parameter_names = "theta", alpha = c(0.1, 0.05
 
 # Summary statistics
 
-# ggCovProb
-
-# ggDist
-
 # Need Methods to compare mcs objects.
 
-# ggCovProb and ggDist should work with multiple objects.
+merge.mcs <- function(...){
+  
+  list_mcs <- list(...)
+  
+  # Check that they are all of class mcs
+  if (list_mcs %>% map_lgl(~ class(.x) == "mcs") %>% all() %>% not()) {
+    stop("Can only merge objects of class 'mcs'.")
+  }
+  
+  
+  
+}
