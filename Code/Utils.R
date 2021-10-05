@@ -1,5 +1,6 @@
 library(DoubleML)
 library(ggpubr)
+library(latex2exp)
 library(magrittr)
 library(mlr3)
 library(tidyverse)
@@ -314,19 +315,29 @@ create_interactions <- function(X, order = 2){
 # Function to calculate rate of convergence from MSEs and N
 estimate_rate <- function(mse_data, plot = TRUE, na.rm = TRUE){
   
+  if (is_grouped_df(mse_data)) mse_data <- mse_data %>% ungroup()
   # Calculate for rising N MSE_2 / MSE_1 * ()
-  if ("algorithms" %in% colnames(mse_sp_nv)) {
+  if ("algorithms" %in% colnames(mse_data)) {
     
-  df_rates <- mse_data %>% 
-    group_by(algorithms) %>% 
-    mutate(Rate = 1 - (MSE / MSE[which(N == min(N, na.rm = na.rm))]) ^ (1 / (N / min(N, na.rm = na.rm) - 1)))
+    if ("Fun" %in% colnames(mse_data)) {
+      df_rates <- mse_data %>% 
+        group_by(algorithms, Fun)
+    } else {
+      df_rates <- mse_data %>% 
+        group_by(algorithms)
+    }
   
   } else {
-    
-    df_rates <- mse_data %>% 
-      mutate(Rate = 1 - (MSE / MSE[which(N == min(N, na.rm = na.rm))]) ^ (1 / (N / min(N, na.rm = na.rm) - 1)))
-    
+    if ("Fun" %in% colnames(mse_data)) {
+      df_rates <- mse_data %>% 
+        group_by(Fun)
+    } else {
+      df_rates <- mse_data
+    }
   }
+  
+  df_rates <- df_rates %>% 
+    mutate(Rate = 1 - (MSE / MSE[which(N == min(N, na.rm = na.rm))]) ^ (1 / (N / min(N, na.rm = na.rm) - 1)))
   
   # Replace rates for smallest N with NA
   df_rates[df_rates$N == min(df_rates$N, na.rm = na.rm), "Rate"] <- NA
@@ -345,15 +356,19 @@ estimate_rate <- function(mse_data, plot = TRUE, na.rm = TRUE){
   
   if (plot) {
     
-    if ("algorithms" %in% colnames(mse_sp_nv)) {
+    if ("algorithms" %in% colnames(mse_data)) {
       
-      mse_plot <- ggplot(mse_data, aes(x = N, y = MSE, col = str_to_title(algorithms))) + 
+      mse_plot <- ggplot(mse_data, aes(
+        x = N, y = MSE, col = str_to_title(algorithms), linetype = "MSE")
+        ) + 
         geom_point() + 
         geom_line() + 
         theme_bw() +
-        labs(col = "Algorithms") 
+        labs(col = "Algorithms", linetype = "") 
       
-      rates_plot <- ggplot(df_rates, aes(x = N, y = Rate, col = str_to_title(algorithms))) + 
+      rates_plot <- ggplot(df_rates, aes(
+        x = N, y = Rate, col = str_to_title(algorithms)
+        )) + 
         geom_point() + 
         geom_line() + 
         theme_bw() +
@@ -361,19 +376,40 @@ estimate_rate <- function(mse_data, plot = TRUE, na.rm = TRUE){
       
     } else {
       
-      mse_plot <- ggplot(mse_data, aes(x = N, y = MSE)) + 
+      mse_plot <- ggplot(mse_data, aes(x = N, y = MSE, linetype = "MSE")) + 
         geom_point() + 
         geom_line() + 
         theme_bw() +
-        labs(col = "Algorithms") 
+        labs(linetype = "") 
       
       rates_plot <- ggplot(df_rates, aes(x = N, y = Rate)) + 
         geom_point() + 
         geom_line() + 
-        theme_bw() +
-        labs(col = "Algorithms")
+        theme_bw()
       
     }
+    
+    if (any(colnames(df_rates) == "Squared Bias")) {
+      mse_plot <- mse_plot + 
+        geom_point(aes(x = N, y = `Squared Bias`)) + 
+        geom_line(aes(x = N, y = `Squared Bias`, linetype = "Squared Bias"))
+    }
+    
+    if (any(colnames(df_rates) == "Variance")) {
+      mse_plot <- mse_plot +
+        geom_point(aes(x = N, y = `Variance`)) + 
+        geom_line(aes(x = N, y = `Variance`, linetype = "Variance"))
+    }
+    
+    if (any(colnames(df_rates) == "Fun")) {
+      
+      mse_plot <- mse_plot + 
+        facet_grid(Fun ~ ., scales = "free_y")
+      
+      rates_plot <- rates_plot + 
+        facet_grid(Fun ~ .) 
+    }
+    
     plot_mse_rate <- ggarrange(mse_plot, rates_plot, common.legend = TRUE, legend = "right")
     
     list(rate = df_rates, rate_desc = df_rates_desc, plot = plot_mse_rate)
@@ -470,36 +506,59 @@ calc_err_approx <- function(truth, response, na.rm = TRUE){
 }
 
 # Function to aggregate nuisance function measures
-desc_nuis <- function(mcs_obj, by = NULL) {
-  
-  list_msrs <- map(mcs_obj$results, ~ {
-    df_msr <- .x$Output$Measures
-    df_msr %>% 
-      mutate(
-        N = .x$N,
-        Sample = .x$Sample
-      )
-    })
-  
-  df_msrs <- do.call(rbind, list_msrs)
+desc_nuis <- function(df_measures, by = NULL) {
   
   if (is.null(by)) {
-    by <- quote(N, fun)
+    by <- quos(N, fun)
   } else {
-    by <- quote(paste0("N, fun", by))
+    by <- quos(N, fun, by)
   }
   
-  df_msrs <- df_msrs %>% 
-    group_by(!!by) %>% 
+  df_measures <- df_measures %>% 
+    group_by(!!!by) %>% 
     summarise(
       across(c(mean_msr_in, mean_msr_val, mse, bias, variance), mean)
     )
   
-  colnames(df_msrs) <- str_to_upper(colnames(df_msrs))
+  colnames(df_measures) <- str_to_title(colnames(df_measures))
   
-  df_msrs
+  df_measures %>% 
+    rename(MSE = Mse)
   
 }
 
 # Function to calculate rate for nuisance function estimators
+mcs_to_df <- function(mcs_obj, parameter_names = "theta"){
+  
+  df_estimates <- get_estimates(mcs_obj)
+  
+  df_estimates$parameter <- get_parameter(mcs_obj, parameter_names)
+  df_estimates$parameter_names <- parameter_names
+  
+  df_measures <- get_measures(mcs_obj)
+  
+  list(Estimates = df_estimates, Measures = df_measures)
+  
+}
 
+# Function to get Measures for Tuning
+get_measures <- function(mcs_obj){
+  
+  if (is_empty(mcs_obj$results)) stop("Run Monte Carlo simulation first.", call. = FALSE)
+  
+  df_results <- map(mcs_obj$results, ~ {
+    
+    if (is_vector(.x$Output$Measures)) {
+      mcs_result <- c(.x$Output$Measures, N = .x$N, Sample = .x$Sample)
+    } else if(is.matrix(.x$Output$Measures) | is.data.frame(x)){
+      mcs_result <- .x$Output$Measures
+      mcs_result$N <- .x$N
+      mcs_result$Sample
+    }
+    
+  }) %>% 
+    map_dfr(~ .x)
+  
+  df_results
+  
+}
