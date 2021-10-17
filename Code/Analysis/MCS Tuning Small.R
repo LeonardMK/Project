@@ -225,7 +225,7 @@ rm(mcs_inter)
 
 load("Data/Neural.RData")
 
-neural <- neural %>% samples(N = c(50, 100, 400), Samples = 1:200)
+neural <- neural %>% subset(N = c(50, 100, 400), Samples = 1:200)
 
 mcs_neural <- mcs(dml_estimator, neural)
 
