@@ -1,7 +1,6 @@
 library(DoubleML)
 library(magrittr)
 library(mlr3verse)
-library(plotly)
 library(tidyverse)
 
 source("Code/DGP class.R")
@@ -40,70 +39,20 @@ g_sine <- dgp_sine(df_X, vec_E, vec_beta, "regression", 3.1) - vec_E
 var(g_sine) / var_E
 fac_g_sine <- 3.1
 
-g_poly <- dgp_poly(df_X, vec_E, 2, type = "regression", factor_signal = 0.55) - 
+g_poly <- dgp_poly(df_X, vec_E, 2, type = "regression", factor_signal = 0.75) - 
   vec_E
 var(g_poly) / var_E
-fac_g_poly <- 0.55
+fac_g_poly <- 0.75
 
 g_nnet <- dgp_nnet(X = df_X, E = vec_E, hidden_units = 5, type = "regression", 
-                   factor_signal = 1.55) - vec_E
+                   factor_signal = 1.75) - vec_E
 var(g_nnet) / var_E
-fac_g_nnet <- 1.55
-
-# Repeat for classification task
-# Also want a 50% share of treated
-# Shift the mean vector so that the share is nearly 50%
-sd_U <- 1
-var_U <- 1
-vec_U <- rnorm(int_N, sd = sd_U)
-
-# Sparse
-m_sparse <- dgp_sparse(df_X, vec_U, vec_gamma_sparse, "classification", 2.9) %>% 
-  sigmoid(inverse = TRUE) %>% 
-  subtract(vec_U)
-var(m_sparse) / var_U
-
-fac_m_sparse <- 2.9
-rbinom(int_N, 1, sigmoid(m_sparse + vec_U)) %>% table()
-
-# Sine
-m_sine <- dgp_sine(df_X, vec_U, vec_gamma, "classification", 3.6) %>% 
-  sigmoid(inverse = TRUE) %>% 
-  subtract(vec_U)
-var(m_sine) / var_U
-
-fac_m_sine <- 3.6
-rbinom(int_N, 1, sigmoid(m_sine + vec_U)) %>% table()
-
-# Polynomial
-int_order <- 2
-m_poly <- dgp_poly(df_X, vec_U, order = int_order, 
-                   type = "classification", factor_signal = 0.55) %>% 
-  sigmoid(inverse = TRUE) %>% 
-  subtract(vec_U)
-var(m_poly) / var_U
-
-fac_m_poly <- 0.55
-rbinom(int_N, 1, sigmoid(m_poly + vec_U - 1.1)) %>% table()
-scale_m_poly <- -1.1
-
-# Neural Net
-int_hidden_units <- 5
-dbl_beta_0 <- -3.4
-
-m_nnet <- dgp_nnet(df_X, vec_U, type = "classification", 
-                   beta_0 = dbl_beta_0, factor_signal = 1.55) %>% 
-  sigmoid(inverse = TRUE) %>% 
-  subtract(vec_U)
-var(m_nnet) / var_U
-
-fac_m_nnet <- 1.55
-rbinom(int_N, 1, sigmoid(m_nnet + vec_U)) %>% table()
+fac_g_nnet <- 1.75
 
 # Create Contour plots
 df_X_viz <- cbind.data.frame(
-  X1 = seq(-2, 2, by = 0.05),
-  X2 = seq(-2, 2, by = 0.05)
+  X1 = seq(-3, 3, by = 0.05),
+  X2 = seq(-3, 3, by = 0.05)
 ) %>% 
   expand.grid()
 
@@ -117,9 +66,8 @@ df_X_viz$Sine <- dgp_sine(df_X_viz[, 1:2],  df_X_viz[, 3],
                           factor_signal = fac_g_sine)
 df_X_viz$Polynomial <- dgp_poly(df_X_viz[, 1:2],  df_X_viz[, 3], 
                                 type = "regression", 
-                                order = int_order, factor_signal = fac_g_poly)
+                                order = 2, factor_signal = fac_g_poly)
 df_X_viz$`Neural Network` <- dgp_nnet(df_X_viz[, 1:2],  df_X_viz[, 3], 
-                                      beta_0 = dbl_beta_0, 
                                       type = "regression", 
                                       factor_signal = fac_g_nnet)
 
@@ -129,6 +77,9 @@ df_X_viz <- df_X_viz %>%
   mutate(across(-c(1:3), ~ .x - E))
 
 df_dgps_viz <- df_X_viz %>% 
+  pivot_longer(cols = -c(1:3), names_to = "DGP", values_to = "Y")
+
+df_dgps_viz_noise <- df_X_noise_viz %>% 
   pivot_longer(cols = -c(1:3), names_to = "DGP", values_to = "Y")
 
 df_dgps_viz %>% 

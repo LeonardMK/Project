@@ -76,6 +76,7 @@ mse <- function(
     suppressMessages({df_mse <- df_results %>% 
       group_by(N, parameter_names, !!!by) %>% 
       summarise(
+        `Mean` = mean(parameter_est),
         MSE = mean(sq_err, na.rm = na.rm),
         `Squared Bias` = mean(bias) ^ 2,
         Variance = var(parameter_est),
@@ -248,7 +249,7 @@ asymptotic_normal <- function(
   
   # Drop prob_range values of 0 and 1
   prob_range <- prob_range[prob_range %in% c(0, 1) %>% not()]
-  # browser()
+  
   # Loop over values of standard normal distribution
   # If df is not NA for all entries take values from t-distribution
   # TODO: Facetting by parameter names for dof plot
@@ -379,6 +380,7 @@ distribution <- function(
   mcs_obj, 
   parameter_names = "theta",
   N = NULL, Samples = NULL,
+  plot = TRUE,
   int_grid = 100,
   na.rm = TRUE,
   by = NULL
@@ -485,13 +487,20 @@ distribution <- function(
   df_results$N <- factor(df_results$N, levels = sort(vec_N))
   
   # Plot is facetted by N
-  ggplot(df_results, aes(x = parameter_est)) + 
-    geom_histogram(stat = "density") + 
-    geom_line(aes(x = x, y = pdf), data = df_seq) + 
-    geom_vline(xintercept = df_results %>% pull(parameter) %>% unique(), col = "red") +
-    labs(y = "Density", x = "Distribution") + 
-    facet_grid(gg_by, scales = "free")
-  
+  if (plot) {
+    
+    gg_dist <- ggplot(df_results) + 
+      geom_histogram(aes(x = parameter_est, y = ..density..), bins = 50) + 
+      geom_line(aes(x = x, y = pdf), data = df_seq) +
+      geom_vline(xintercept = df_results %>% pull(parameter) %>% unique(), col = "red") +
+      labs(y = "Density", x = "Distribution") +
+      facet_grid(gg_by, labeller = label_wrap_gen(width = 10), scales = "free")
+    
+    list(data = df_results, normality = df_seq, plot = gg_dist)
+    
+  } else {
+    list(data = df_results, normality = df_seq)
+  }
 }
 
 # Coverage Probabilities
@@ -623,7 +632,7 @@ cov_prob <- function(mcs_obj, parameter_names = "theta", alpha = c(0.1, 0.05, 0.
         labs(y = "Coverage Probability", x = "Sample Size", shape = str_to_title(as.character(by[[1]]))) + 
         theme_bw() + 
         scale_color_continuous(type = "viridis") +  
-        facet_grid(eval(by[[1]]) ~ `Type of CI`)
+        facet_grid(eval(by[[1]]) ~ `Type of CI`, labeller = label_wrap_gen(width = 10))
       
     } else {
       

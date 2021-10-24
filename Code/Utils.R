@@ -313,27 +313,19 @@ create_interactions <- function(X, order = 2){
 }
 
 # Function to calculate rate of convergence from MSEs and N
-estimate_rate <- function(mse_data, plot = TRUE, na.rm = TRUE){
+estimate_rate <- function(mse_data, plot_mse = TRUE, plot_rate = TRUE, na.rm = TRUE){
   
   if (is_grouped_df(mse_data)) mse_data <- mse_data %>% ungroup()
   # Calculate for rising N MSE_2 / MSE_1 * ()
   if ("algorithms" %in% colnames(mse_data)) {
-    
-    if ("Fun" %in% colnames(mse_data)) {
-      df_rates <- mse_data %>% 
-        group_by(algorithms, Fun)
-    } else {
-      df_rates <- mse_data %>% 
-        group_by(algorithms)
-    }
-  
+    df_rates <- mse_data %>% 
+      group_by(algorithms)
+  } else if ("Mle" %in% colnames(mse_data)){
+    df_rates <- mse_data %>% 
+      mutate(Mle = str_to_title(str_remove(Mle, "^.*\\."))) %>% 
+      group_by(Fun, Mle)
   } else {
-    if ("Fun" %in% colnames(mse_data)) {
-      df_rates <- mse_data %>% 
-        group_by(Fun)
-    } else {
-      df_rates <- mse_data
-    }
+    df_rates <- mse_data
   }
   
   df_rates <- df_rates %>% 
@@ -354,13 +346,26 @@ estimate_rate <- function(mse_data, plot = TRUE, na.rm = TRUE){
       Maximum = max(Rate, na.rm = na.rm)
     )
   
-  if (plot) {
+  if (plot_mse | plot_rate) {
     
-    if ("algorithms" %in% colnames(mse_data)) {
+    if ("MLE" %in% colnames(mse_data)) {
       
-      mse_plot <- ggplot(mse_data, aes(
+      mse_plot <- ggplot(df_rates, aes(x = N, y = MSE, col = Mle, linetype = "MSE")) + 
+        geom_point() + 
+        geom_line() + 
+        theme_bw() +
+        labs(linetype = "", col = "MLE") 
+      
+      rates_plot <- ggplot(df_rates, aes(x = N, y = Rate, col = Mle)) + 
+        geom_point() + 
+        geom_line() + 
+        theme_bw()
+      
+    } else if ("algorithms" %in% colnames(mse_data)) {
+      
+      mse_plot <- ggplot(df_rates, aes(
         x = N, y = MSE, col = str_to_title(algorithms), linetype = "MSE")
-        ) + 
+      ) + 
         geom_point() + 
         geom_line() + 
         theme_bw() +
@@ -368,7 +373,7 @@ estimate_rate <- function(mse_data, plot = TRUE, na.rm = TRUE){
       
       rates_plot <- ggplot(df_rates, aes(
         x = N, y = Rate, col = str_to_title(algorithms)
-        )) + 
+      )) + 
         geom_point() + 
         geom_line() + 
         theme_bw() +
@@ -376,7 +381,7 @@ estimate_rate <- function(mse_data, plot = TRUE, na.rm = TRUE){
       
     } else {
       
-      mse_plot <- ggplot(mse_data, aes(x = N, y = MSE, linetype = "MSE")) + 
+      mse_plot <- ggplot(df_rates, aes(x = N, y = MSE, linetype = "MSE")) + 
         geom_point() + 
         geom_line() + 
         theme_bw() +
@@ -395,7 +400,10 @@ estimate_rate <- function(mse_data, plot = TRUE, na.rm = TRUE){
         geom_line(aes(x = N, y = `Squared Bias`, linetype = "Squared Bias"))
     }
     
-    if (any(colnames(df_rates) == "Variance")) {
+    if (
+      any(colnames(df_rates) == "Variance") & 
+      !("MLE" %in% colnames(mse_data))
+    ) {
       mse_plot <- mse_plot +
         geom_point(aes(x = N, y = `Variance`)) + 
         geom_line(aes(x = N, y = `Variance`, linetype = "Variance"))
@@ -410,13 +418,19 @@ estimate_rate <- function(mse_data, plot = TRUE, na.rm = TRUE){
         facet_grid(Fun ~ .) 
     }
     
-    plot_mse_rate <- ggarrange(mse_plot, rates_plot, common.legend = TRUE, legend = "right")
+    if (plot_mse & plot_rate) {
+      plot_return <- ggarrange(mse_plot, rates_plot, common.legend = TRUE, legend = "right")
+    } else if (plot_mse & !plot_rate) {
+      plot_return <- mse_plot
+    } else if (!plot_mse & plot_rate) {
+      plot_return <- rates_plot
+    }
     
-    list(rate = df_rates, rate_desc = df_rates_desc, plot = plot_mse_rate)
+    list(rate = df_rates, rate_desc = df_rates_desc, plot = plot_return)
     
   } else {
     
-    list(data = df_rates, rate_desc = df_rates_desc)
+    list(rate = df_rates, rate_desc = df_rates_desc)
     
   }
   
@@ -506,12 +520,12 @@ calc_err_approx <- function(truth, response, na.rm = TRUE){
 }
 
 # Function to aggregate nuisance function measures
-desc_nuis <- function(df_measures, by = NULL) {
+desc_nuis <- function(df_measures) {
   
   if (is.null(by)) {
     by <- quos(N, fun)
   } else {
-    by <- quos(N, fun, by)
+    by <- quos(N, fun, mle)
   }
   
   df_measures <- df_measures %>% 
@@ -561,4 +575,17 @@ get_measures <- function(mcs_obj){
   
   df_results
   
+}
+
+transform_scientific <- function(data, digits = 3){
+  data %>% 
+    ungroup() %>% 
+    mutate(
+      across(is.numeric, ~ {
+        case_when(
+          .x < 1 / (10 ^ digits) ~ format(.x, digits = 2, scientific = TRUE),
+          TRUE ~ as.character(round(.x, digits))
+        )
+      })
+    )
 }

@@ -23,7 +23,7 @@ run_analysis <- function(
   # Calculate MSE
   df_mse <- mse(df_estimates, parameter_names, N, Samples, na.rm, by)
   
-  list_rates_theta <- estimate_rate(df_mse, TRUE, na.rm)
+  list_rates_theta <- estimate_rate(df_mse, TRUE, TRUE, na.rm)
   
   # Round Data for Output
   list_rates_theta$rate <- list_rates_theta$rate %>% 
@@ -44,13 +44,13 @@ run_analysis <- function(
   )
   
   # Get approximation to nuisance function
-  df_ns_dsc <- desc_nuis(df_measures, by = by) %>% 
+  df_ns_dsc <- desc_nuis(df_measures) %>% 
     mutate(Fun = case_when(
       Fun == "ml_g" ~ "E[Y| X]",
       Fun == "ml_m" ~ "E[D| X]",
       TRUE ~ NA_character_
     ))
-  list_rates_ns <- estimate_rate(df_ns_dsc)
+  list_rates_ns <- estimate_rate(df_ns_dsc, TRUE, FALSE, na.rm)
   
   list_rates_ns$rate <- list_rates_ns$rate %>% 
     rename(
@@ -62,16 +62,7 @@ run_analysis <- function(
   list_rates_ns$rate_desc <- list_rates_ns$rate_desc %>% 
     rename("Nuisance Function" = "Fun")
   
-  list_rates_ns$rate <- list_rates_ns$rate %>% 
-    ungroup() %>% 
-    mutate(
-      Bias = case_when(
-        str_detect(as.character(Bias), "e-..$") ~ 
-        str_remove(as.character(Bias), "(?<=\\..{2}).*(?=e-..)"),
-        TRUE ~ as.character(round(Bias, digits))
-      ),
-      across(is.numeric, ~ round(.x, digits))
-    )
+  list_rates_ns$rate <- list_rates_ns$rate %>% transform_scientific(digits)
   
   list_rates_ns$rate_desc <- list_rates_ns$rate_desc %>% 
     mutate(across(is.numeric, ~ round(.x, digits)))
@@ -89,14 +80,14 @@ run_analysis <- function(
   )
   
   # Get distribution of estimates
-  gg_dist <- distribution(
+  list_dist <- distribution(
     mcs_obj = df_estimates,
     parameter_names, N, Samples, na.rm = na.rm, by = by
   )
   
   ggsave(
     filename = paste0("Results/Plots/", file, "/", name, "_dist.png"), 
-    plot = gg_dist,
+    plot = list_dist$plot,
     scale = scale
   )
   
