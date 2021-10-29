@@ -7,7 +7,7 @@ vec_mle_unique <- c(
 vec_samples <- 1:200
 vec_N <- c(50, 100, 400)
 
-vec_cases <- c("not", "rcv"
+vec_cases <- c("not", "rcv")
 vec_files <- list.files(
   path = "Results/Data/Final MCS Data/", 
   pattern = "not|rcv")
@@ -36,7 +36,7 @@ list_missing_samples <- map(vec_files, function(file_path){
         N = int_N,
         ml_g = str_extract(str_algorithms, "(?<=^G: ).*(?= M: .*$)"),
         ml_m = str_extract(str_algorithms, "(?<= M: ).*")
-        )
+      )
     }
   })
   
@@ -52,25 +52,27 @@ names(list_missing_samples) <- str_remove(vec_files, "\\.RData")
 
 # Function to estimate missings
 compute_missings <- function(list_indices, dgp, ...){
-  list_mcs_obj <- map(list_indices, ~{
   browser()
-  
-  int_N <- .x$N
-  vec_index_samples <- .x$index
-  str_ml_g <- paste0("regr.", .x$ml_g)
-  str_ml_m <- paste0("classif.", .x$ml_m)
-  
-  # Create mcs
-  dgp_subset <- dgp %>% subset(N = int_N, Samples = vec_index_samples)
-  mcs_obj <- mcs(dml_estimator, dgp_subset)
-  mcs_obj <- mcs_obj %>% 
-    run_simulation(
+  list_args <- list(...)
+  list_mcs_obj <- map(list_indices, function(index){
+    browser()
+    int_N <- index$N
+    vec_index_samples <- index$index
+    str_ml_g <- paste0("regr.", index$ml_g)
+    str_ml_m <- paste0("classif.", index$ml_m)
+    
+    # Create mcs
+    dgp_subset <- dgp %>% subset(N = int_N, Samples = vec_index_samples)
+    mcs_obj <- mcs(dml_estimator, dgp_subset)
+    mcs_obj <- exec(
+      .fn = run_simulation,
+      mcs_obj,
       ml_g = str_ml_g,
       ml_m = str_ml_m,
-      ...
-    )
-  
-  mcs_to_df(mcs_obj)
+      list_args
+      )
+    
+    mcs_to_df(mcs_obj)
     
   })
   
@@ -82,24 +84,5 @@ compute_missings <- function(list_indices, dgp, ...){
     Estimates = df_estimates,
     Measures = df_measures
   )
-
+  
 }
-
-load("Data/Sparse.RData")
-
-sparse <- sparse %>% subset(N = c(50, 100, 400), Samples = 1:200)
-
-compute_missings(
-  list_missing_samples$mcs_sparse_not, 
-  sparse,
-  seed = 10, 
-  workers = int_cores,
-  x_cols = vec_X_cols,
-  d_cols = vec_D_col,
-  y_col = vec_Y_col,
-  tune = FALSE,
-  rsmp_key = "cv",
-  rsmp_args = list(folds = 5),
-  par_grids = list_parameterspace,
-  list_globals = list_globals
-  )

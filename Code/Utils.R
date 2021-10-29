@@ -531,6 +531,7 @@ desc_nuis <- function(df_measures) {
   df_measures <- df_measures %>% 
     group_by(!!!by) %>% 
     summarise(
+      sd_mse = sd(mse),
       across(c(mean_msr_in, mean_msr_val, mse, bias, variance), mean)
     )
   
@@ -583,7 +584,7 @@ transform_scientific <- function(data, digits = 3){
     mutate(
       across(is.numeric, ~ {
         case_when(
-          .x < 1 / (10 ^ digits) ~ format(.x, digits = 2, scientific = TRUE),
+          abs(.x) < 1 / (10 ^ digits) ~ format(.x, digits = 2, scientific = TRUE),
           TRUE ~ as.character(round(.x, digits))
         )
       })

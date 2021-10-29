@@ -10,7 +10,7 @@ int_digits <- 3
 dbl_scale <- 2
 vec_N <- c(50, 100, 400, 1600)
 int_N_unique <- length(vec_N)
-vec_cases <- c("Naive", "Only Cross-Fitting", "Only Orthogonal Score", "DML")
+vec_cases <- c("Naive", "Only Cross-Fitting", "Only Orthogonal", "DML")
 
 # Sparse ------------------------------------------------------------------
 
@@ -37,7 +37,7 @@ df_nuis_sparse_naive <- desc_nuis(mcs_sparse_naive$Measures) %>%
 # Eta estimator doesn't overfit and is unbiased
 df_nuis_sparse_naive %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, 
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Sparse/naive_eta.tex")
 
 # Look at Theta parameter directly
@@ -52,14 +52,14 @@ df_rate_sparse_naive <- list_rate_sparse_naive$rate %>%
 
 df_rate_sparse_naive %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Sparse/naive_theta.tex")
 
 df_rate_desc_sparse_naive <- list_rate_sparse_naive$rate_desc
 
 df_rate_desc_sparse_naive %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Sparse/naive_rate_theta.tex")
 
 # Non-Orthogonal Score ----------------------------------------------------
@@ -80,7 +80,7 @@ df_nuis_sparse_non_orth <- desc_nuis(mcs_sparse_non_orth$Measures) %>%
 # Eta estimator doesn't overfit and is unbiased
 df_nuis_sparse_non_orth %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, 
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb", 
             out = "Results/Tables/Motivation/Sparse/non_orth_eta.tex")
 
 # Look at Theta parameter directly
@@ -94,14 +94,14 @@ df_rate_sparse_non_orth <- list_rate_sparse_non_orth$rate %>%
 
 df_rate_sparse_non_orth %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Sparse/non_orth_theta.tex")
 
 df_rate_desc_sparse_non_orth <- list_rate_sparse_non_orth$rate_desc
 
 df_rate_desc_sparse_non_orth %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Sparse/non_orth_rate_theta.tex")
 
 # Non Cross-Fitting -------------------------------------------------------
@@ -122,7 +122,7 @@ df_nuis_sparse_non_cf <- desc_nuis(mcs_sparse_non_cf$Measures) %>%
 # Eta estimator doesn't overfit and is unbiased
 df_nuis_sparse_non_cf %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, 
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb", 
             out = "Results/Tables/Motivation/Sparse/non_cf_eta.tex")
 
 # Look at Theta parameter directly
@@ -136,14 +136,14 @@ df_rate_sparse_non_cf <- list_rate_sparse_non_cf$rate %>%
 
 df_rate_sparse_non_cf %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Sparse/non_cf_theta.tex")
 
 df_rate_desc_sparse_non_cf <- list_rate_sparse_non_cf$rate_desc
 
 df_rate_desc_sparse_non_cf %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Sparse/non_cf_rate_theta.tex")
 
 
@@ -165,7 +165,7 @@ df_nuis_sparse_dml <- desc_nuis(mcs_sparse_dml$Measures) %>%
 # Eta estimator doesn't overfit and is unbiased
 df_nuis_sparse_dml %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, 
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb", 
             out = "Results/Tables/Motivation/Sparse/dml_eta.tex")
 
 # Look at Theta parameter directly
@@ -179,14 +179,14 @@ df_rate_sparse_dml <- list_rate_sparse_dml$rate %>%
 
 df_rate_sparse_dml %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Sparse/dml_theta.tex")
 
 df_rate_desc_sparse_dml <- list_rate_sparse_dml$rate_desc
 
 df_rate_desc_sparse_dml %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Sparse/dml_rate_theta.tex")
 
 
@@ -202,8 +202,7 @@ df_nuis_sparse <- rbind.data.frame(
 
 df_nuis_sparse$Case = rep(vec_cases, each = 2 * int_N_unique)
 
-df_nuis_sparse <- df_nuis_sparse %>% 
-  filter(Case != "Naive")
+df_nuis_sparse <- df_nuis_sparse[df_nuis_sparse$Case != "Naive", ]
 
 df_nuis_sparse %>% 
   ggplot(aes(x = N, col = Case)) + 
@@ -223,7 +222,7 @@ df_nuis_sparse_dml %>%
   column_to_rownames("Fun") %>% 
   set_rownames(c("$ l_0(X) $", "$ m_0(X) $")) %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE,
+  stargazer(summary = FALSE, table.placement = "H",
             title = "Estimated MSE of $ \\hat{\\eta}_0 $ (Sparse)",
             label = "tab_mot_sparse_nuis_mse",
             out = "Results/Tables/Motivation/Sparse/nuis_mse.tex",
@@ -235,24 +234,23 @@ df_nuis_sparse_dml %>%
   column_to_rownames("Fun") %>% 
   set_rownames(c("$ l_0(X) $", "$ m_0(X) $")) %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE,
+  stargazer(summary = FALSE, table.placement = "H",
             title = "Estimated Bias of $ \\hat{\\eta}_0 $ (Sparse)",
             label = "tab_mot_sparse_nuis_bias",
             out = "Results/Tables/Motivation/Sparse/nuis_bias.tex",
             rownames = TRUE)
 
-df_nuis_sparse_dml %>% 
+df_nuis_sparse %>% 
   mutate(Difference = `MSR. Validation` - `MSR. Test`) %>% 
-  select(N, Fun, Difference) %>% 
+  select(Case, N, Fun, Difference) %>% 
   pivot_wider(values_from = Difference, names_from = N) %>% 
-  column_to_rownames("Fun") %>% 
-  set_rownames(c("$ l_0(X) $", "$ m_0(X) $")) %>% 
+  rename("Nuisance" = "Fun") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE,
+  stargazer(summary = FALSE, table.placement = "H",
             title = "Difference of Validation and Test Error Measure (Sparse)",
             label = "tab_mot_sparse_nuis_diff_msrs",
             out = "Results/Tables/Motivation/Sparse/nuis_diff_msrs.tex",
-            rownames = TRUE)
+            rownames = FALSE)
 
 # Plot showing MSE, Squared Bias and Variance for all cases
 df_rate_sparse <- rbind(
@@ -297,7 +295,7 @@ df_rate_sparse %>%
   pivot_wider(values_from = Rate, names_from = N) %>% 
   column_to_rownames("Case") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, 
+  stargazer(summary = FALSE, table.placement = "H", 
             title = "Estimated Rate (Sparse)",
             label = "tab_mot_sparse_rate",
             out = "Results/Tables/Motivation/Sparse/rates.tex", 
@@ -310,7 +308,7 @@ df_rate_sparse %>%
   pivot_wider(values_from = MSE, names_from = N) %>% 
   column_to_rownames("Case") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, 
+  stargazer(summary = FALSE, table.placement = "H", 
             title = "MSE of $ \\hat{\\theta}_0 $ (Sparse)",
             label = "tab_mot_sparse_mse",
             out = "Results/Tables/Motivation/Sparse/mse.tex", 
@@ -318,15 +316,15 @@ df_rate_sparse %>%
 
 # Table with Squared Bias
 df_rate_sparse %>% 
-  select(N, `Mean Bias`, Case) %>% 
-  filter(!is.na(`Mean Bias`)) %>% 
-  pivot_wider(values_from = `Mean Bias`, names_from = N) %>% 
+  select(N, `Squared Bias`, Case) %>% 
+  filter(!is.na(`Squared Bias`)) %>% 
+  pivot_wider(values_from = `Squared Bias`, names_from = N) %>% 
   column_to_rownames("Case") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, 
-            title = "Bias of $ \\hat{\\theta}_0 $ (Sparse)",
-            label = "tab_mot_sparse_bias",
-            out = "Results/Tables/Motivation/Sparse/bias.tex", 
+  stargazer(summary = FALSE, table.placement = "H", 
+            title = "Squared Bias of $ \\hat{\\theta}_0 $ (Sparse)",
+            label = "tab_mot_sparse_sq_bias",
+            out = "Results/Tables/Motivation/Sparse/sq_bias.tex", 
             rownames = TRUE)
 
 # Table with Variance
@@ -336,7 +334,7 @@ df_rate_sparse %>%
   pivot_wider(values_from = Variance, names_from = N) %>% 
   column_to_rownames("Case") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, 
+  stargazer(summary = FALSE, table.placement = "H", 
             title = "Variance of $ \\hat{\\theta}_0 $ (Sparse)",
             label = "tab_mot_sparse_variance",
             out = "Results/Tables/Motivation/Sparse/variance.tex", 
@@ -358,7 +356,7 @@ df_parameter_sparse <- rbind(
 df_parameter_sparse$Case <- factor(
   x = rep(vec_cases, each = nrow(df_parameter_sparse) / length(vec_cases)),
   levels = vec_cases
-  )
+)
 
 df_parameter_sparse <- df_parameter_sparse %>% 
   filter(Case != "Naive")
@@ -382,7 +380,8 @@ ggplot(df_parameter_sparse) +
   geom_histogram(aes(x = parameter_est, y = ..density..)) + 
   geom_line(aes(x = x, y = pdf), data = df_normal_sparse) + 
   geom_vline(xintercept = dbl_theta, col = "red") +
-  facet_wrap(Case ~ N, scales = "free", strip.position = "right") +
+  facet_wrap(Case ~ N, scales = "free", strip.position = "right",
+             labeller = labeller(N = label_both)) +
   labs(x = TeX("$\\hat{\\theta}_0$"), y = "Density") +
   theme_bw()
 
@@ -447,7 +446,7 @@ df_nuis_sine_naive <- desc_nuis(mcs_sine_naive$Measures) %>%
 # Eta estimator doesn't overfit and is unbiased
 df_nuis_sine_naive %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, 
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb", 
             out = "Results/Tables/Motivation/Sine/naive_eta.tex")
 
 # Look at Theta parameter directly
@@ -462,14 +461,14 @@ df_rate_sine_naive <- list_rate_sine_naive$rate %>%
 
 df_rate_sine_naive %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Sine/naive_theta.tex")
 
 df_rate_desc_sine_naive <- list_rate_sine_naive$rate_desc
 
 df_rate_desc_sine_naive %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Sine/naive_rate_theta.tex")
 
 # Non-Orthogonal Score ----------------------------------------------------
@@ -490,7 +489,7 @@ df_nuis_sine_non_orth <- desc_nuis(mcs_sine_non_orth$Measures) %>%
 # Eta estimator doesn't overfit and is unbiased
 df_nuis_sine_non_orth %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, 
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb", 
             out = "Results/Tables/Motivation/Sine/non_orth_eta.tex")
 
 # Look at Theta parameter directly
@@ -504,14 +503,14 @@ df_rate_sine_non_orth <- list_rate_sine_non_orth$rate %>%
 
 df_rate_sine_non_orth %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Sine/non_orth_theta.tex")
 
 df_rate_desc_sine_non_orth <- list_rate_sine_non_orth$rate_desc
 
 df_rate_desc_sine_non_orth %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Sine/non_orth_rate_theta.tex")
 
 # Non Cross-Fitting -------------------------------------------------------
@@ -532,7 +531,7 @@ df_nuis_sine_non_cf <- desc_nuis(mcs_sine_non_cf$Measures) %>%
 # Eta estimator doesn't overfit and is unbiased
 df_nuis_sine_non_cf %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, 
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb", 
             out = "Results/Tables/Motivation/Sine/non_cf_eta.tex")
 
 # Look at Theta parameter directly
@@ -546,14 +545,14 @@ df_rate_sine_non_cf <- list_rate_sine_non_cf$rate %>%
 
 df_rate_sine_non_cf %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Sine/non_cf_theta.tex")
 
 df_rate_desc_sine_non_cf <- list_rate_sine_non_cf$rate_desc
 
 df_rate_desc_sine_non_cf %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Sine/non_cf_rate_theta.tex")
 
 
@@ -575,7 +574,7 @@ df_nuis_sine_dml <- desc_nuis(mcs_sine_dml$Measures) %>%
 # Eta estimator doesn't overfit and is unbiased
 df_nuis_sine_dml %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, 
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb", 
             out = "Results/Tables/Motivation/Sine/dml_eta.tex")
 
 # Look at Theta parameter directly
@@ -589,14 +588,14 @@ df_rate_sine_dml <- list_rate_sine_dml$rate %>%
 
 df_rate_sine_dml %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Sine/dml_theta.tex")
 
 df_rate_desc_sine_dml <- list_rate_sine_dml$rate_desc
 
 df_rate_desc_sine_dml %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Sine/dml_rate_theta.tex")
 
 
@@ -612,8 +611,7 @@ df_nuis_sine <- rbind.data.frame(
 
 df_nuis_sine$Case = rep(vec_cases, each = 2 * int_N_unique)
 
-df_nuis_sine <- df_nuis_sine %>% 
-  filter(Case != "Naive")
+df_nuis_sine <- df_nuis_sine[df_nuis_sine$Case != "Naive", ]
 
 df_nuis_sine %>% 
   ggplot(aes(x = N, col = Case)) + 
@@ -633,7 +631,7 @@ df_nuis_sine_dml %>%
   column_to_rownames("Fun") %>% 
   set_rownames(c("$ l_0(X) $", "$ m_0(X) $")) %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE,
+  stargazer(summary = FALSE, table.placement = "!htb",
             title = "Estimated MSE of $ \\hat{\\eta}_0 $ (Sine)",
             label = "tab_mot_sine_nuis_mse",
             out = "Results/Tables/Motivation/Sine/nuis_mse.tex",
@@ -645,24 +643,23 @@ df_nuis_sine_dml %>%
   column_to_rownames("Fun") %>% 
   set_rownames(c("$ l_0(X) $", "$ m_0(X) $")) %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE,
+  stargazer(summary = FALSE, table.placement = "!htb",
             title = "Estimated Bias of $ \\hat{\\eta}_0 $ (Sine)",
             label = "tab_mot_sine_nuis_bias",
             out = "Results/Tables/Motivation/Sine/nuis_bias.tex",
             rownames = TRUE)
 
-df_nuis_sine_dml %>% 
+df_nuis_sine %>% 
   mutate(Difference = `MSR. Validation` - `MSR. Test`) %>% 
-  select(N, Fun, Difference) %>% 
+  select(Case, N, Fun, Difference) %>% 
   pivot_wider(values_from = Difference, names_from = N) %>% 
-  column_to_rownames("Fun") %>% 
-  set_rownames(c("$ l_0(X) $", "$ m_0(X) $")) %>% 
+  rename("Nuisance" = "Fun") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE,
+  stargazer(summary = FALSE, table.placement = "H",
             title = "Difference of Validation and Test Error Measure (Sine)",
             label = "tab_mot_sine_nuis_diff_msrs",
             out = "Results/Tables/Motivation/Sine/nuis_diff_msrs.tex",
-            rownames = TRUE)
+            rownames = FALSE)
 
 # Plot showing MSE, Squared Bias and Variance for all cases
 df_rate_sine <- rbind(
@@ -707,7 +704,7 @@ df_rate_sine %>%
   pivot_wider(values_from = Rate, names_from = N) %>% 
   column_to_rownames("Case") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, 
+  stargazer(summary = FALSE, table.placement = "H", 
             title = "Estimated Rate (Sine)",
             label = "tab_mot_sine_rate",
             out = "Results/Tables/Motivation/Sine/rates.tex", 
@@ -720,7 +717,7 @@ df_rate_sine %>%
   pivot_wider(values_from = MSE, names_from = N) %>% 
   column_to_rownames("Case") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, 
+  stargazer(summary = FALSE, table.placement = "H", 
             title = "MSE of $ \\hat{\\theta}_0 $ (Sine)",
             label = "tab_mot_sine_mse",
             out = "Results/Tables/Motivation/Sine/mse.tex", 
@@ -728,15 +725,15 @@ df_rate_sine %>%
 
 # Table with Squared Bias
 df_rate_sine %>% 
-  select(N, `Mean Bias`, Case) %>% 
-  filter(!is.na(`Mean Bias`)) %>% 
-  pivot_wider(values_from = `Mean Bias`, names_from = N) %>% 
+  select(N, `Squared Bias`, Case) %>% 
+  filter(!is.na(`Squared Bias`)) %>% 
+  pivot_wider(values_from = `Squared Bias`, names_from = N) %>% 
   column_to_rownames("Case") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, 
-            title = "Bias of $ \\hat{\\theta}_0 $ (Sine)",
-            label = "tab_mot_sine_bias",
-            out = "Results/Tables/Motivation/Sine/bias.tex", 
+  stargazer(summary = FALSE, table.placement = "H", 
+            title = "Squared Bias of $ \\hat{\\theta}_0 $ (Sine)",
+            label = "tab_mot_sine_sq_bias",
+            out = "Results/Tables/Motivation/Sine/sq_bias.tex", 
             rownames = TRUE)
 
 # Table with Variance
@@ -746,7 +743,7 @@ df_rate_sine %>%
   pivot_wider(values_from = Variance, names_from = N) %>% 
   column_to_rownames("Case") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, 
+  stargazer(summary = FALSE, table.placement = "H", 
             title = "Variance of $ \\hat{\\theta}_0 $ (Sine)",
             label = "tab_mot_sine_variance",
             out = "Results/Tables/Motivation/Sine/variance.tex", 
@@ -792,7 +789,8 @@ ggplot(df_parameter_sine) +
   geom_histogram(aes(x = parameter_est, y = ..density..)) + 
   geom_line(aes(x = x, y = pdf), data = df_normal_sine) + 
   geom_vline(xintercept = dbl_theta, col = "red") +
-  facet_wrap(Case ~ N, scales = "free", strip.position = "right") +
+  facet_wrap(Case ~ N, scales = "free", strip.position = "right",
+             labeller = labeller(N = label_both)) +
   labs(x = TeX("$\\hat{\\theta}_0$"), y = "Density") +
   theme_bw()
 
@@ -856,7 +854,7 @@ df_nuis_inter_naive <- desc_nuis(mcs_inter_naive$Measures) %>%
 # Eta estimator doesn't overfit and is unbiased
 df_nuis_inter_naive %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, 
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb", 
             out = "Results/Tables/Motivation/Inter/naive_eta.tex")
 
 # Look at Theta parameter directly
@@ -871,14 +869,14 @@ df_rate_inter_naive <- list_rate_inter_naive$rate %>%
 
 df_rate_inter_naive %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Inter/naive_theta.tex")
 
 df_rate_desc_inter_naive <- list_rate_inter_naive$rate_desc
 
 df_rate_desc_inter_naive %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Inter/naive_rate_theta.tex")
 
 # Non-Orthogonal Score ----------------------------------------------------
@@ -899,7 +897,7 @@ df_nuis_inter_non_orth <- desc_nuis(mcs_inter_non_orth$Measures) %>%
 # Eta estimator doesn't overfit and is unbiased
 df_nuis_inter_non_orth %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, 
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb", 
             out = "Results/Tables/Motivation/Inter/non_orth_eta.tex")
 
 # Look at Theta parameter directly
@@ -913,14 +911,14 @@ df_rate_inter_non_orth <- list_rate_inter_non_orth$rate %>%
 
 df_rate_inter_non_orth %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Inter/non_orth_theta.tex")
 
 df_rate_desc_inter_non_orth <- list_rate_inter_non_orth$rate_desc
 
 df_rate_desc_inter_non_orth %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Inter/non_orth_rate_theta.tex")
 
 # Non Cross-Fitting -------------------------------------------------------
@@ -941,7 +939,7 @@ df_nuis_inter_non_cf <- desc_nuis(mcs_inter_non_cf$Measures) %>%
 # Eta estimator doesn't overfit and is unbiased
 df_nuis_inter_non_cf %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, 
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb", 
             out = "Results/Tables/Motivation/Inter/non_cf_eta.tex")
 
 # Look at Theta parameter directly
@@ -955,14 +953,14 @@ df_rate_inter_non_cf <- list_rate_inter_non_cf$rate %>%
 
 df_rate_inter_non_cf %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Inter/non_cf_theta.tex")
 
 df_rate_desc_inter_non_cf <- list_rate_inter_non_cf$rate_desc
 
 df_rate_desc_inter_non_cf %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Inter/non_cf_rate_theta.tex")
 
 
@@ -984,7 +982,7 @@ df_nuis_inter_dml <- desc_nuis(mcs_inter_dml$Measures) %>%
 # Eta estimator doesn't overfit and is unbiased
 df_nuis_inter_dml %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, 
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb", 
             out = "Results/Tables/Motivation/Inter/dml_eta.tex")
 
 # Look at Theta parameter directly
@@ -998,14 +996,14 @@ df_rate_inter_dml <- list_rate_inter_dml$rate %>%
 
 df_rate_inter_dml %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Inter/dml_theta.tex")
 
 df_rate_desc_inter_dml <- list_rate_inter_dml$rate_desc
 
 df_rate_desc_inter_dml %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Inter/dml_rate_theta.tex")
 
 
@@ -1021,8 +1019,7 @@ df_nuis_inter <- rbind.data.frame(
 
 df_nuis_inter$Case = rep(vec_cases, each = 2 * int_N_unique)
 
-df_nuis_inter <- df_nuis_inter %>% 
-  filter(Case != "Naive")
+df_nuis_inter <- df_nuis_inter[df_nuis_inter$Case != "Naive", ]
 
 df_nuis_inter %>% 
   ggplot(aes(x = N, col = Case)) + 
@@ -1042,7 +1039,7 @@ df_nuis_inter_dml %>%
   column_to_rownames("Fun") %>% 
   set_rownames(c("$ l_0(X) $", "$ m_0(X) $")) %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE,
+  stargazer(summary = FALSE, table.placement = "!htb",
             title = "Estimated MSE of $ \\hat{\\eta}_0 $ (Inter)",
             label = "tab_mot_inter_nuis_mse",
             out = "Results/Tables/Motivation/Inter/nuis_mse.tex",
@@ -1054,24 +1051,23 @@ df_nuis_inter_dml %>%
   column_to_rownames("Fun") %>% 
   set_rownames(c("$ l_0(X) $", "$ m_0(X) $")) %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE,
+  stargazer(summary = FALSE, table.placement = "!htb",
             title = "Estimated Bias of $ \\hat{\\eta}_0 $ (Inter)",
             label = "tab_mot_inter_nuis_bias",
             out = "Results/Tables/Motivation/Inter/nuis_bias.tex",
             rownames = TRUE)
 
-df_nuis_inter_dml %>% 
+df_nuis_inter %>% 
   mutate(Difference = `MSR. Validation` - `MSR. Test`) %>% 
-  select(N, Fun, Difference) %>% 
+  select(Case, N, Fun, Difference) %>% 
   pivot_wider(values_from = Difference, names_from = N) %>% 
-  column_to_rownames("Fun") %>% 
-  set_rownames(c("$ l_0(X) $", "$ m_0(X) $")) %>% 
+  rename("Nuisance" = "Fun") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE,
+  stargazer(summary = FALSE, table.placement = "H",
             title = "Difference of Validation and Test Error Measure (Inter)",
             label = "tab_mot_inter_nuis_diff_msrs",
             out = "Results/Tables/Motivation/Inter/nuis_diff_msrs.tex",
-            rownames = TRUE)
+            rownames = FALSE)
 
 # Plot showing MSE, Squared Bias and Variance for all cases
 df_rate_inter <- rbind(
@@ -1116,7 +1112,7 @@ df_rate_inter %>%
   pivot_wider(values_from = Rate, names_from = N) %>% 
   column_to_rownames("Case") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, 
+  stargazer(summary = FALSE, table.placement = "H", 
             title = "Estimated Rate (Interaction)",
             label = "tab_mot_inter_rate",
             out = "Results/Tables/Motivation/Inter/rates.tex", 
@@ -1129,7 +1125,7 @@ df_rate_inter %>%
   pivot_wider(values_from = MSE, names_from = N) %>% 
   column_to_rownames("Case") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, 
+  stargazer(summary = FALSE, table.placement = "H", 
             title = "MSE of $ \\hat{\\theta}_0 $ (Interaction)",
             label = "tab_mot_inter_mse",
             out = "Results/Tables/Motivation/Inter/mse.tex", 
@@ -1137,15 +1133,15 @@ df_rate_inter %>%
 
 # Table with Squared Bias
 df_rate_inter %>% 
-  select(N, `Mean Bias`, Case) %>% 
-  filter(!is.na(`Mean Bias`)) %>% 
-  pivot_wider(values_from = `Mean Bias`, names_from = N) %>% 
+  select(N, `Squared Bias`, Case) %>% 
+  filter(!is.na(`Squared Bias`)) %>% 
+  pivot_wider(values_from = `Squared Bias`, names_from = N) %>% 
   column_to_rownames("Case") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, 
-            title = "Bias of $ \\hat{\\theta}_0 $ (Interaction)",
-            label = "tab_mot_inter_bias",
-            out = "Results/Tables/Motivation/Inter/bias.tex", 
+  stargazer(summary = FALSE, table.placement = "H", 
+            title = "Squared Bias of $ \\hat{\\theta}_0 $ (Interaction)",
+            label = "tab_mot_inter_sq_bias",
+            out = "Results/Tables/Motivation/Inter/sq_bias.tex", 
             rownames = TRUE)
 
 # Table with Variance
@@ -1155,7 +1151,7 @@ df_rate_inter %>%
   pivot_wider(values_from = Variance, names_from = N) %>% 
   column_to_rownames("Case") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, 
+  stargazer(summary = FALSE, table.placement = "H", 
             title = "Variance of $ \\hat{\\theta}_0 $ (Interaction)",
             label = "tab_mot_inter_variance",
             out = "Results/Tables/Motivation/Inter/variance.tex", 
@@ -1201,7 +1197,8 @@ ggplot(df_parameter_inter) +
   geom_histogram(aes(x = parameter_est, y = ..density..)) + 
   geom_line(aes(x = x, y = pdf), data = df_normal_inter) + 
   geom_vline(xintercept = dbl_theta, col = "red") +
-  facet_wrap(Case ~ N, scales = "free", strip.position = "right") +
+  facet_wrap(Case ~ N, scales = "free", strip.position = "right",
+             labeller = labeller(N = label_both)) +
   labs(x = TeX("$\\hat{\\theta}_0$"), y = "Density") +
   theme_bw()
 
@@ -1266,7 +1263,7 @@ df_nuis_neural_naive <- desc_nuis(mcs_neural_naive$Measures) %>%
 # Eta estimator doesn't overfit and is unbiased
 df_nuis_neural_naive %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, 
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb", 
             out = "Results/Tables/Motivation/Neural/naive_eta.tex")
 
 # Look at Theta parameter directly
@@ -1281,14 +1278,14 @@ df_rate_neural_naive <- list_rate_neural_naive$rate %>%
 
 df_rate_neural_naive %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Neural/naive_theta.tex")
 
 df_rate_desc_neural_naive <- list_rate_neural_naive$rate_desc
 
 df_rate_desc_neural_naive %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Neural/naive_rate_theta.tex")
 
 # Non-Orthogonal Score ----------------------------------------------------
@@ -1309,7 +1306,7 @@ df_nuis_neural_non_orth <- desc_nuis(mcs_neural_non_orth$Measures) %>%
 # Eta estimator doesn't overfit and is unbiased
 df_nuis_neural_non_orth %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, 
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb", 
             out = "Results/Tables/Motivation/Neural/non_orth_eta.tex")
 
 # Look at Theta parameter directly
@@ -1323,14 +1320,14 @@ df_rate_neural_non_orth <- list_rate_neural_non_orth$rate %>%
 
 df_rate_neural_non_orth %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Neural/non_orth_theta.tex")
 
 df_rate_desc_neural_non_orth <- list_rate_neural_non_orth$rate_desc
 
 df_rate_desc_neural_non_orth %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Neural/non_orth_rate_theta.tex")
 
 # Non Cross-Fitting -------------------------------------------------------
@@ -1351,7 +1348,7 @@ df_nuis_neural_non_cf <- desc_nuis(mcs_neural_non_cf$Measures) %>%
 # Eta estimator doesn't overfit and is unbiased
 df_nuis_neural_non_cf %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, 
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb", 
             out = "Results/Tables/Motivation/Neural/non_cf_eta.tex")
 
 # Look at Theta parameter directly
@@ -1365,14 +1362,14 @@ df_rate_neural_non_cf <- list_rate_neural_non_cf$rate %>%
 
 df_rate_neural_non_cf %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Neural/non_cf_theta.tex")
 
 df_rate_desc_neural_non_cf <- list_rate_neural_non_cf$rate_desc
 
 df_rate_desc_neural_non_cf %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Neural/non_cf_rate_theta.tex")
 
 
@@ -1394,7 +1391,7 @@ df_nuis_neural_dml <- desc_nuis(mcs_neural_dml$Measures) %>%
 # Eta estimator doesn't overfit and is unbiased
 df_nuis_neural_dml %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, 
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb", 
             out = "Results/Tables/Motivation/Neural/dml_eta.tex")
 
 # Look at Theta parameter directly
@@ -1408,14 +1405,14 @@ df_rate_neural_dml <- list_rate_neural_dml$rate %>%
 
 df_rate_neural_dml %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Neural/dml_theta.tex")
 
 df_rate_desc_neural_dml <- list_rate_neural_dml$rate_desc
 
 df_rate_desc_neural_dml %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE,
+  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
             out = "Results/Tables/Motivation/Neural/dml_rate_theta.tex")
 
 
@@ -1431,8 +1428,7 @@ df_nuis_neural <- rbind.data.frame(
 
 df_nuis_neural$Case = rep(vec_cases, each = 2 * int_N_unique)
 
-df_nuis_neural <- df_nuis_neural %>% 
-  filter(Case != "Naive")
+df_nuis_neural <- df_nuis_neural[df_nuis_neural$Case != "Naive", ]
 
 df_nuis_neural %>% 
   ggplot(aes(x = N, col = Case)) + 
@@ -1452,7 +1448,7 @@ df_nuis_neural_dml %>%
   column_to_rownames("Fun") %>% 
   set_rownames(c("$ l_0(X) $", "$ m_0(X) $")) %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE,
+  stargazer(summary = FALSE, table.placement = "!htb",
             title = "Estimated MSE of $ \\hat{\\eta}_0 $ (Neural)",
             label = "tab_mot_neural_nuis_mse",
             out = "Results/Tables/Motivation/Neural/nuis_mse.tex",
@@ -1464,24 +1460,23 @@ df_nuis_neural_dml %>%
   column_to_rownames("Fun") %>% 
   set_rownames(c("$ l_0(X) $", "$ m_0(X) $")) %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE,
+  stargazer(summary = FALSE, table.placement = "!htb",
             title = "Estimated Bias of $ \\hat{\\eta}_0 $ (Neural)",
             label = "tab_mot_neural_nuis_bias",
             out = "Results/Tables/Motivation/Neural/nuis_bias.tex",
             rownames = TRUE)
 
-df_nuis_neural_dml %>% 
+df_nuis_neural %>% 
   mutate(Difference = `MSR. Validation` - `MSR. Test`) %>% 
-  select(N, Fun, Difference) %>% 
+  select(Case, N, Fun, Difference) %>% 
   pivot_wider(values_from = Difference, names_from = N) %>% 
-  column_to_rownames("Fun") %>% 
-  set_rownames(c("$ l_0(X) $", "$ m_0(X) $")) %>% 
+  rename("Nuisance" = "Fun") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE,
+  stargazer(summary = FALSE, table.placement = "H",
             title = "Difference of Validation and Test Error Measure (Neural)",
             label = "tab_mot_neural_nuis_diff_msrs",
             out = "Results/Tables/Motivation/Neural/nuis_diff_msrs.tex",
-            rownames = TRUE)
+            rownames = FALSE)
 
 # Plot showing MSE, Squared Bias and Variance for all cases
 df_rate_neural <- rbind(
@@ -1526,7 +1521,7 @@ df_rate_neural %>%
   pivot_wider(values_from = Rate, names_from = N) %>% 
   column_to_rownames("Case") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, 
+  stargazer(summary = FALSE, table.placement = "H", 
             title = "Estimated Rate (Neural Network)",
             label = "tab_mot_neural_rate",
             out = "Results/Tables/Motivation/Neural/rates.tex", 
@@ -1539,7 +1534,7 @@ df_rate_neural %>%
   pivot_wider(values_from = MSE, names_from = N) %>% 
   column_to_rownames("Case") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, 
+  stargazer(summary = FALSE, table.placement = "H", 
             title = "MSE of $ \\hat{\\theta}_0 $ (Neural Network)",
             label = "tab_mot_neural_mse",
             out = "Results/Tables/Motivation/Neural/mse.tex", 
@@ -1547,15 +1542,15 @@ df_rate_neural %>%
 
 # Table with Squared Bias
 df_rate_neural %>% 
-  select(N, `Mean Bias`, Case) %>% 
-  filter(!is.na(`Mean Bias`)) %>% 
-  pivot_wider(values_from = `Mean Bias`, names_from = N) %>% 
+  select(N, `Squared Bias`, Case) %>% 
+  filter(!is.na(`Squared Bias`)) %>% 
+  pivot_wider(values_from = `Squared Bias`, names_from = N) %>% 
   column_to_rownames("Case") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, 
-            title = "Bias of $ \\hat{\\theta}_0 $ (Neural Network)",
-            label = "tab_mot_neural_bias",
-            out = "Results/Tables/Motivation/Neural/bias.tex", 
+  stargazer(summary = FALSE, table.placement = "H", 
+            title = "Squared Bias of $ \\hat{\\theta}_0 $ (Neural Network)",
+            label = "tab_mot_neural_sq_bias",
+            out = "Results/Tables/Motivation/Neural/sq_bias.tex", 
             rownames = TRUE)
 
 # Table with Variance
@@ -1565,7 +1560,7 @@ df_rate_neural %>%
   pivot_wider(values_from = Variance, names_from = N) %>% 
   column_to_rownames("Case") %>% 
   transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, 
+  stargazer(summary = FALSE, table.placement = "H", 
             title = "Variance of $ \\hat{\\theta}_0 $ (Neural Network)",
             label = "tab_mot_neural_variance",
             out = "Results/Tables/Motivation/Neural/variance.tex", 
@@ -1611,7 +1606,8 @@ ggplot(df_parameter_neural) +
   geom_histogram(aes(x = parameter_est, y = ..density..)) + 
   geom_line(aes(x = x, y = pdf), data = df_normal_neural) + 
   geom_vline(xintercept = dbl_theta, col = "red") +
-  facet_wrap(Case ~ N, scales = "free", strip.position = "right") +
+  facet_wrap(Case ~ N, scales = "free", strip.position = "right",
+             labeller = labeller(N = label_both)) +
   labs(x = TeX("$\\hat{\\theta}_0$"), y = "Density") +
   theme_bw()
 
@@ -1660,17 +1656,24 @@ df_rate_dml <- rbind(
   df_rate_sine_dml,
   df_rate_inter_dml,
   df_rate_neural_dml
-  ) %>% 
+) %>% 
   select(N, Rate) %>% 
   drop_na()
 
 df_rate_dml$`Nuisance Function` <- rep(c("Sparse", "Sine", "Interaction", "Neural Net"), each = 3)
 
+df_rate_dml <- df_rate_dml %>% 
+  pivot_wider(names_from = N, values_from = Rate)
+
+df_rate_dml$`Mean Rate` <- rowMeans(df_rate_dml[, -1])
+
 df_rate_dml %>% 
-  pivot_wider(names_from = N, values_from = Rate) %>% 
   transform_scientific(int_digits) %>% 
+  column_to_rownames("Nuisance Function") %>% 
   stargazer(title = "Estimated Rates by $ N $", 
             label = "tab_mot_rate", 
             summary = FALSE, 
+            table.placement = "!htb", 
+            rownames = TRUE,
             out = "Results/Tables/Motivation/rate_conv.tex")
 

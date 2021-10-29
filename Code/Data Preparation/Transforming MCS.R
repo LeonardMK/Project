@@ -21,7 +21,7 @@ vec_files <- setdiff(
 
 # Iterate over and remove Tuning Results in Settings. Save in new folder
 vec_files %>% walk(~ {
-
+  
   str_path <- paste0("Results/Data/", .x, ".RData")
   
   if (0.000001 * file.size(str_path) < 0.5 * memory.size()) {
@@ -104,6 +104,34 @@ vec_files_unique %>% walk(~ {
   # Remove Duplicates
   df_estimates <- distinct(df_estimates)
   df_measures <- distinct(df_measures)
+  
+  # In case tuning is applied an extra entry is needed for best and the original learner
+  if ("algorithms" %in% colnames(df_estimates)) {
+    
+    df_estimates_best <- df_estimates %>% 
+      filter(algorithms == "Best", 
+             str_remove(ml_g, "^regr\\.") == str_remove(ml_m, "^classif\\.")) %>% 
+      mutate(algorithms = paste0("G: ", 
+                                 str_remove(ml_g, "^regr\\."), 
+                                 " M: ", 
+                                 str_remove(ml_m, "^classif\\.")))
+    
+    df_estimates <- rbind(df_estimates, df_estimates_best) %>% 
+      arrange(N, Sample, algorithms) %>% 
+      rename("Algorithms" = "algorithms") %>% 
+      mutate(Algorithms = case_when(
+        Algorithms == "Best" ~ "Best Measure",
+        Algorithms == "G: glmnet M: glmnet" ~ "E-Net",
+        Algorithms == "G: xgboost M: xgboost" ~ "SGBM",
+        Algorithms == "G: ranger M: ranger" ~ "RF",
+        Algorithms == "G: rpart M: rpart" ~ "CART",
+        Algorithms == "G: kknn M: kknn" ~ "K-KNN",
+        Algorithms == "G: nnet M: nnet" ~ "N-Net"
+      ))
+    
+  }
+  
+  
   list_mcs_results <- list(Estimates = df_estimates, Measures = df_measures)
   
   # Export
@@ -111,6 +139,6 @@ vec_files_unique %>% walk(~ {
   save(
     list = .x, 
     file = paste0("Results/Data/Final MCS Data/", .x, ".RData")
-    )
+  )
   
 })
