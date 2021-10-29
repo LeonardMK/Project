@@ -96,7 +96,7 @@ mcs_sparse_non_orth$dgp$datasets <- NULL
 save(mcs_sparse_non_orth, file = paste0(str_path, "/mcs_sparse_non_orth_big.RData"))
 rm(mcs_sparse_non_orth)
 
-mcs_sparse_no_cf <- mcs_sparse %>% 
+mcs_sparse_non_cf <- mcs_sparse %>% 
   run_simulation(
     seed = 10, 
     workers = int_cores,
@@ -112,9 +112,9 @@ mcs_sparse_no_cf <- mcs_sparse %>%
     apply_cross_fitting = FALSE
   )
 
-mcs_sparse_no_cf$dgp$datasets <- NULL
-save(mcs_sparse_no_cf, file = paste0(str_path, "/mcs_sparse_no_cf_big.RData"))
-rm(mcs_sparse_no_cf)
+mcs_sparse_non_cf$dgp$datasets <- NULL
+save(mcs_sparse_non_cf, file = paste0(str_path, "/mcs_sparse_non_cf_big.RData"))
+rm(mcs_sparse_non_cf)
 
 mcs_sparse_dml <- mcs_sparse %>% 
   run_simulation(
@@ -194,7 +194,7 @@ mcs_sine_non_orth$dgp$datasets <- NULL
 save(mcs_sine_non_orth, file = paste0(str_path, "/mcs_sine_non_orth_big.RData"))
 rm(mcs_sine_non_orth)
 
-mcs_sine_no_cf <- mcs_sine %>% 
+mcs_sine_non_cf <- mcs_sine %>% 
   run_simulation(
     seed = 10, 
     workers = int_cores,
@@ -210,9 +210,9 @@ mcs_sine_no_cf <- mcs_sine %>%
     apply_cross_fitting = FALSE
   )
 
-mcs_sine_no_cf$dgp$datasets <- NULL
-save(mcs_sine_no_cf, file = paste0(str_path, "/mcs_sine_no_cf_big.RData"))
-rm(mcs_sine_no_cf)
+mcs_sine_non_cf$dgp$datasets <- NULL
+save(mcs_sine_non_cf, file = paste0(str_path, "/mcs_sine_non_cf_big.RData"))
+rm(mcs_sine_non_cf)
 
 mcs_sine_dml <- mcs_sine %>% 
   run_simulation(
@@ -294,7 +294,7 @@ mcs_inter_non_orth$dgp$datasets <- NULL
 save(mcs_inter_non_orth, file = paste0(str_path, "/mcs_inter_non_orth_big.RData"))
 rm(mcs_inter_non_orth)
 
-mcs_inter_no_cf <- mcs_inter %>% 
+mcs_inter_non_cf <- mcs_inter %>% 
   run_simulation(
     seed = 10, 
     workers = int_cores,
@@ -310,9 +310,9 @@ mcs_inter_no_cf <- mcs_inter %>%
     apply_cross_fitting = FALSE
   )
 
-mcs_inter_no_cf$dgp$datasets <- NULL
-save(mcs_inter_no_cf, file = paste0(str_path, "/mcs_inter_no_cf_big.RData"))
-rm(mcs_inter_no_cf)
+mcs_inter_non_cf$dgp$datasets <- NULL
+save(mcs_inter_non_cf, file = paste0(str_path, "/mcs_inter_non_cf_big.RData"))
+rm(mcs_inter_non_cf)
 
 mcs_inter_dml <- mcs_inter %>% 
   run_simulation(
@@ -393,7 +393,7 @@ mcs_neural_non_orth$dgp$datasets <- NULL
 save(mcs_neural_non_orth, file = paste0(str_path, "/mcs_neural_non_orth_big.RData"))
 rm(mcs_neural_non_orth)
 
-mcs_neural_no_cf <- mcs_neural %>% 
+mcs_neural_non_cf <- mcs_neural %>% 
   run_simulation(
     seed = 10, 
     workers = int_cores,
@@ -409,9 +409,9 @@ mcs_neural_no_cf <- mcs_neural %>%
     apply_cross_fitting = FALSE
   )
 
-mcs_neural_no_cf$dgp$datasets <- NULL
-save(mcs_neural_no_cf, file = paste0(str_path, "/mcs_neural_no_cf_big.RData"))
-rm(mcs_neural_no_cf)
+mcs_neural_non_cf$dgp$datasets <- NULL
+save(mcs_neural_non_cf, file = paste0(str_path, "/mcs_neural_non_cf_big.RData"))
+rm(mcs_neural_non_cf)
 
 mcs_neural_dml <- mcs_neural %>% 
   run_simulation(
