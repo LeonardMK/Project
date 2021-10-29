@@ -64,7 +64,7 @@ mcs_sparse_naive <- mcs_sparse %>%
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
     tune = TRUE,
-    rsmp_key = "non_cf",
+    rsmp_key = "no_cf",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace, tune_settings = list_tune_settings,
     list_globals = list_globals,
@@ -97,7 +97,7 @@ mcs_sparse_non_orth$dgp$datasets <- NULL
 save(mcs_sparse_non_orth, file = paste0(str_path, "/mcs_sparse_non_orth_small.RData"))
 rm(mcs_sparse_non_orth)
 
-mcs_sparse_non_cf <- mcs_sparse %>% 
+mcs_sparse_no_cf <- mcs_sparse %>% 
   run_simulation(
     seed = 10, 
     workers = int_cores,
@@ -107,15 +107,15 @@ mcs_sparse_non_cf <- mcs_sparse %>%
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
     tune = TRUE,
-    rsmp_key = "non_cf",
+    rsmp_key = "no_cf",
     par_grids = list_parameterspace, tune_settings = list_tune_settings,
     list_globals = list_globals,
     apply_cross_fitting = FALSE
   )
 
-mcs_sparse_non_cf$dgp$datasets <- NULL
-save(mcs_sparse_non_cf, file = paste0(str_path, "/mcs_sparse_non_cf_small.RData"))
-rm(mcs_sparse_non_cf)
+mcs_sparse_no_cf$dgp$datasets <- NULL
+save(mcs_sparse_no_cf, file = paste0(str_path, "/mcs_sparse_no_cf_small.RData"))
+rm(mcs_sparse_no_cf)
 
 mcs_sparse_dml <- mcs_sparse %>% 
   run_simulation(
@@ -163,7 +163,7 @@ mcs_sine_naive <- mcs_sine %>%
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
     tune = TRUE,
-    rsmp_key = "non_cf",
+    rsmp_key = "no_cf",
     par_grids = list_parameterspace, tune_settings = list_tune_settings,
     list_globals = list_globals,
     score = non_orth_score,
@@ -195,7 +195,7 @@ mcs_sine_non_orth$dgp$datasets <- NULL
 save(mcs_sine_non_orth, file = paste0(str_path, "/mcs_sine_non_orth_small.RData"))
 rm(mcs_sine_non_orth)
 
-mcs_sine_non_cf <- mcs_sine %>% 
+mcs_sine_no_cf <- mcs_sine %>% 
   run_simulation(
     seed = 10, 
     workers = int_cores,
@@ -205,15 +205,15 @@ mcs_sine_non_cf <- mcs_sine %>%
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
     tune = TRUE,
-    rsmp_key = "non_cf",
+    rsmp_key = "no_cf",
     par_grids = list_parameterspace, tune_settings = list_tune_settings,
     list_globals = list_globals,
     apply_cross_fitting = FALSE
   )
 
-mcs_sine_non_cf$dgp$datasets <- NULL
-save(mcs_sine_non_cf, file = paste0(str_path, "/mcs_sine_non_cf_small.RData"))
-rm(mcs_sine_non_cf)
+mcs_sine_no_cf$dgp$datasets <- NULL
+save(mcs_sine_no_cf, file = paste0(str_path, "/mcs_sine_no_cf_small.RData"))
+rm(mcs_sine_no_cf)
 
 mcs_sine_dml <- mcs_sine %>% 
   run_simulation(
@@ -263,7 +263,7 @@ mcs_inter_naive <- mcs_inter %>%
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
     tune = TRUE,
-    rsmp_key = "non_cf",
+    rsmp_key = "no_cf",
     par_grids = list_parameterspace, tune_settings = list_tune_settings,
     list_globals = list_globals,
     score = non_orth_score,
@@ -295,7 +295,7 @@ mcs_inter_non_orth$dgp$datasets <- NULL
 save(mcs_inter_non_orth, file = paste0(str_path, "/mcs_inter_non_orth_small.RData"))
 rm(mcs_inter_non_orth)
 
-mcs_inter_non_cf <- mcs_inter %>% 
+mcs_inter_no_cf <- mcs_inter %>% 
   run_simulation(
     seed = 10, 
     workers = int_cores,
@@ -305,15 +305,15 @@ mcs_inter_non_cf <- mcs_inter %>%
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
     tune = TRUE,
-    rsmp_key = "non_cf",
+    rsmp_key = "no_cf",
     par_grids = list_parameterspace, tune_settings = list_tune_settings,
     list_globals = list_globals,
     apply_cross_fitting = FALSE
   )
 
-mcs_inter_non_cf$dgp$datasets <- NULL
-save(mcs_inter_non_cf, file = paste0(str_path, "/mcs_inter_non_cf_small.RData"))
-rm(mcs_inter_non_cf)
+mcs_inter_no_cf$dgp$datasets <- NULL
+save(mcs_inter_no_cf, file = paste0(str_path, "/mcs_inter_no_cf_small.RData"))
+rm(mcs_inter_no_cf)
 
 mcs_inter_dml <- mcs_inter %>% 
   run_simulation(
@@ -362,7 +362,7 @@ mcs_neural_naive <- mcs_neural %>%
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
     tune = TRUE,
-    rsmp_key = "non_cf",
+    rsmp_key = "no_cf",
     par_grids = list_parameterspace, tune_settings = list_tune_settings,
     list_globals = list_globals,
     score = non_orth_score,
@@ -394,7 +394,7 @@ mcs_neural_non_orth$dgp$datasets <- NULL
 save(mcs_neural_non_orth, file = paste0(str_path, "/mcs_neural_non_orth_small.RData"))
 rm(mcs_neural_non_orth)
 
-mcs_neural_non_cf <- mcs_neural %>% 
+mcs_neural_no_cf <- mcs_neural %>% 
   run_simulation(
     seed = 10, 
     workers = int_cores,
@@ -404,16 +404,16 @@ mcs_neural_non_cf <- mcs_neural %>%
     ml_g = vec_ml_g,
     ml_m = vec_ml_m,
     tune = TRUE,
-    rsmp_key = "non_cf",
+    rsmp_key = "no_cf",
     rsmp_args = list(folds = 5),
     par_grids = list_parameterspace, tune_settings = list_tune_settings,
     list_globals = list_globals,
     apply_cross_fitting = FALSE
   )
 
-mcs_neural_non_cf$dgp$datasets <- NULL
-save(mcs_neural_non_cf, file = paste0(str_path, "/mcs_neural_non_cf_small.RData"))
-rm(mcs_neural_non_cf)
+mcs_neural_no_cf$dgp$datasets <- NULL
+save(mcs_neural_no_cf, file = paste0(str_path, "/mcs_neural_no_cf_small.RData"))
+rm(mcs_neural_no_cf)
 
 mcs_neural_dml <- mcs_neural %>% 
   run_simulation(
