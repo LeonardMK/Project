@@ -105,6 +105,9 @@ vec_files_unique %>% walk(~ {
   df_estimates <- distinct(df_estimates)
   df_measures <- distinct(df_measures)
   
+  # Turn around bias in eta_0
+  df_measures$bias <- - df_measures$bias
+  
   # In case tuning is applied an extra entry is needed for best and the original learner
   if ("algorithms" %in% colnames(df_estimates)) {
     
@@ -130,7 +133,6 @@ vec_files_unique %>% walk(~ {
       ))
     
   }
-  
   
   list_mcs_results <- list(Estimates = df_estimates, Measures = df_measures)
   

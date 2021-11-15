@@ -20,10 +20,8 @@ dml_df <- DoubleMLData$new(
   d_cols = str_d
 )
 
-vec_ml_g <- c("regr.glmnet", "regr.xgboost", "regr.ranger", "regr.rpart", 
-              "regr.kknn", "regr.nnet")
-vec_ml_m <- c("classif.glmnet", "classif.xgboost", "classif.ranger", 
-              "classif.rpart", "classif.kknn", "classif.nnet")
+vec_ml_g <- c("regr.xgboost", "regr.ranger", "regr.nnet")
+vec_ml_m <- c("classif.xgboost", "classif.ranger", "classif.nnet")
 
 # Need to limit number of parameters selected by random forest
 list_parameterspace$ranger$ml_g$params$mtry$upper <- length(vec_x)
@@ -77,7 +75,7 @@ list_tune_settings <- list(
 # Start model fitting
 df_grid_lrns <- cbind.data.frame(ml_g = vec_ml_g, ml_m = vec_ml_m)
 
-int_cores <- parallel::detectCores() - 1
+int_cores <- parallel::detectCores()
 plan(multisession, workers = int_cores)
 
 pbar <- progress::progress_bar$new(
@@ -177,15 +175,137 @@ list_results <- pmap(df_grid_lrns, function(ml_g, ml_m){
       msr_m_val_set_irm, "irm", ml_g, ml_m)
   )
   
-  print(df_)
+  print(df_results)
   
   pbar$tick()
+  
+  df_results
   
 })
 
 # Aggregate results
 df_results <- list_results %>% 
-  map_df(~ .x) %>% 
-  set_names(c("coef", "se", "pval", "msr_g_val", "msr_m_val", "model"))
+  map_df(~ {
+    colnames(.x) <- c("coef", "se", "pval", "msr_g_val", "msr_m_val", "model", 
+                      "ml_g", "ml_m")
+    .x
+  })
 
- # Refit with best performing Models.
+# Refit with best performing Models.
+lrn_plr_g <- df_results %>% 
+  filter(model == "plr") %>% 
+  filter(msr_g_val == min(msr_g_val)) %>% 
+  pull(ml_g) %>% 
+  str_remove("^regr\\.")
+
+lrn_plr_m <- df_results %>% 
+  filter(model == "plr") %>% 
+  filter(msr_m_val == min(msr_m_val)) %>% 
+  pull(ml_m) %>% 
+  str_remove("^classif\\.")
+
+lrn_irm_g <- df_results %>% 
+  filter(model == "irm") %>% 
+  filter(msr_g_val == min(msr_g_val)) %>% 
+  pull(ml_g) %>% 
+  str_remove("^regr\\.")
+
+lrn_irm_m <- df_results %>% 
+  filter(model == "irm") %>% 
+  filter(msr_m_val == min(msr_m_val)) %>% 
+  pull(ml_m) %>% 
+  str_remove("^classif\\.")
+
+list_par_grids_plr <- list(
+  ml_g = list_parameterspace[[lrn_plr_g]]$ml_g, 
+  ml_m = list_parameterspace[[lrn_plr_m]]$ml_m
+)
+
+list_par_grids_irm <- list(
+  ml_g = list_parameterspace[[lrn_irm_g]]$ml_g, 
+  ml_m = list_parameterspace[[lrn_irm_m]]$ml_m
+)
+
+# Refit models
+dml_plr <- DoubleMLPLR$new(
+  data = dml_df,
+  ml_g = lrn(paste0("regr.", lrn_plr_g)),
+  ml_m = lrn(paste0("classif.", lrn_plr_m)),
+  draw_sample_splitting = FALSE
+)
+
+dml_plr$set_sample_splitting(list_samples)
+
+plan(multisession, workers = int_cores)
+
+ddpcr::quiet({
+  dml_plr$tune(
+    param_set = list_par_grids_plr,
+    tune_settings = list_tune_settings,
+    tune_on_folds = TRUE
+  )
+  
+  dml_plr$fit(store_predictions = TRUE)
+})
+
+dml_irm <- DoubleMLIRM$new(
+  data = dml_df,
+  ml_g = lrn(paste0("regr.", lrn_irm_g)),
+  ml_m = lrn(paste0("classif.", lrn_irm_m)),
+  draw_sample_splitting = FALSE
+)
+
+dml_irm$set_sample_splitting(list_samples)
+
+plan(multisession, workers = int_cores)
+
+ddpcr::quiet({
+  dml_irm$tune(
+    param_set = list_par_grids_irm,
+    tune_settings = list_tune_settings,
+    tune_on_folds = TRUE
+  )
+  
+  dml_irm$fit(store_predictions = TRUE)
+})
+
+df_results_final <- df_results %>% 
+  rbind(
+    c(dml_plr$coef, dml_plr$se, dml_plr$pval, NA, NA, "plr", 
+      dml_plr$learner$ml_g$id, dml_plr$learner$ml_m$id),
+    c(dml_irm$coef, dml_irm$se, dml_irm$pval, NA, NA, "irm", 
+      dml_irm$learner$ml_g$id, dml_irm$learner$ml_m$id)
+  )
+
+save(df_results_final, file = "Results/Data/e401k.RData")
+
+vec_mle_replace <- c("SGBM", "RF", "N-Net")
+names(vec_mle_replace) <- c("xgboost", "ranger", "nnet")
+
+df_results_final %>% 
+  mutate(
+    across(1:5, as.numeric),
+    ml_g = str_remove(ml_g, "^regr\\."),
+    ml_m = str_remove(ml_m, "^classif\\."),
+    Algorithms = case_when(
+      ml_g == ml_m ~ ml_g,
+      TRUE ~ paste0("$ l_0(X) $: ", ml_g, " $ m_0(X) $ : ", ml_m)
+    ),
+    Algorithms = str_replace_all(Algorithms, vec_mle_replace)
+  ) %>% 
+  arrange(desc(model)) %>% 
+  select(-ml_g, -ml_m) %>% 
+  transform_scientific(2) %>% 
+  set_names(c("$ \\hat{\\theta}_0 $", "SE", "p-value", 
+              "Prediction Error $ \\hat{l}_0(X) $", 
+              "Prediction Error $ \\hat{m}_0(X) $",
+              "Model")) %>% 
+  stargazer(
+    summary = FALSE,
+    out = "Results/Tables/e401k.tex",
+    title = "Estimates of $ \theta_0 $ for the Partial Linear Regression and
+    Interactive Model",
+    label = "tab_example_e401k"
+  )
+
+df_results_final$pval <- format(df_results_final$pval, digits = 2, scientific = TRUE)

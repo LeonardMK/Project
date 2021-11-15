@@ -10,57 +10,13 @@ int_digits <- 3
 dbl_scale <- 2
 vec_N <- c(50, 100, 400, 1600)
 int_N_unique <- length(vec_N)
-vec_cases <- c("Naive", "Only Cross-Fitting", "Only Orthogonal", "DML")
+vec_cases <- c("Only Cross-Fitting", "Only Orthogonal", "DML")
 
 # Sparse ------------------------------------------------------------------
 
-load("Results/Data/Final MCS Data/mcs_sparse_naive.RData")
-load("Results/Data/Final MCS Data/mcs_sparse_non_cf.RData")
 load("Results/Data/Final MCS Data/mcs_sparse_non_orth.RData")
+load("Results/Data/Final MCS Data/mcs_sparse_non_cf.RData")
 load("Results/Data/Final MCS Data/mcs_sparse_dml.RData")
-
-# Naive -------------------------------------------------------------------
-
-df_nuis_sparse_naive <- desc_nuis(mcs_sparse_naive$Measures) %>% 
-  arrange(Fun) %>% 
-  select(-Mle, -Variance) %>% 
-  rename("MSR. Test" = "Mean_msr_in", "MSR. Validation" = Mean_msr_val) %>% 
-  mutate(
-    Fun = case_when(
-      Fun == "ml_g" ~ "l(X)",
-      Fun == "ml_m" ~ "m(X)",
-      TRUE ~ NA_character_
-    )
-  )
-
-
-# Eta estimator doesn't overfit and is unbiased
-df_nuis_sparse_naive %>% 
-  transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
-            out = "Results/Tables/Motivation/Sparse/naive_eta.tex")
-
-# Look at Theta parameter directly
-
-list_rate_sparse_naive <- mcs_sparse_naive %>% 
-  pluck("Estimates") %>% 
-  mse() %>% 
-  estimate_rate(FALSE, FALSE, TRUE)
-
-df_rate_sparse_naive <- list_rate_sparse_naive$rate %>% 
-  select(-parameter_names)
-
-df_rate_sparse_naive %>% 
-  transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
-            out = "Results/Tables/Motivation/Sparse/naive_theta.tex")
-
-df_rate_desc_sparse_naive <- list_rate_sparse_naive$rate_desc
-
-df_rate_desc_sparse_naive %>% 
-  transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
-            out = "Results/Tables/Motivation/Sparse/naive_rate_theta.tex")
 
 # Non-Orthogonal Score ----------------------------------------------------
 
@@ -194,15 +150,12 @@ df_rate_desc_sparse_dml %>%
 
 # Plot for Nuisance MSE between cases.
 df_nuis_sparse <- rbind.data.frame(
-  df_nuis_sparse_naive,
   df_nuis_sparse_non_orth,
   df_nuis_sparse_non_cf,
   df_nuis_sparse_dml
 )
 
 df_nuis_sparse$Case = rep(vec_cases, each = 2 * int_N_unique)
-
-df_nuis_sparse <- df_nuis_sparse[df_nuis_sparse$Case != "Naive", ]
 
 df_nuis_sparse %>% 
   ggplot(aes(x = N, col = Case)) + 
@@ -213,7 +166,7 @@ df_nuis_sparse %>%
   theme_bw() + 
   scale_shape_manual(values = c(3, 4, 15, 16))
 
-ggsave("Results/Plots/Motivation/Sparse/nuis_mse.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Sparse/nuis_mse.png", width = 30, height = 15, units = "cm")
 
 # Table showing MSRs, MSE and Bias for l_0 and m_0
 df_nuis_sparse_dml %>% 
@@ -240,30 +193,26 @@ df_nuis_sparse_dml %>%
             out = "Results/Tables/Motivation/Sparse/nuis_bias.tex",
             rownames = TRUE)
 
-df_nuis_sparse %>% 
-  mutate(Difference = `MSR. Validation` - `MSR. Test`) %>% 
-  select(Case, N, Fun, Difference) %>% 
-  pivot_wider(values_from = Difference, names_from = N) %>% 
-  rename("Nuisance" = "Fun") %>% 
-  transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, table.placement = "H",
-            title = "Difference of Validation and Test Error Measure (Sparse)",
-            label = "tab_mot_sparse_nuis_diff_msrs",
-            out = "Results/Tables/Motivation/Sparse/nuis_diff_msrs.tex",
-            rownames = FALSE)
+# df_nuis_sparse %>% 
+#   filter(Case != "Only Orthogonal") %>% 
+#   select(Case, N, Fun, Difference) %>% 
+#   pivot_wider(values_from = Difference, names_from = N) %>% 
+#   rename("Nuisance" = "Fun") %>% 
+#   transform_scientific(int_digits) %>% 
+#   stargazer(summary = FALSE, table.placement = "H",
+#             title = "Difference of Validation and Test Error Measure (Sparse)",
+#             label = "tab_mot_sparse_nuis_diff_msrs",
+#             out = "Results/Tables/Motivation/Sparse/nuis_diff_msrs.tex",
+#             rownames = FALSE)
 
 # Plot showing MSE, Squared Bias and Variance for all cases
 df_rate_sparse <- rbind(
-  df_rate_sparse_naive,
   df_rate_sparse_non_orth,
   df_rate_sparse_non_cf,
   df_rate_sparse_dml
 )
 
 df_rate_sparse$Case <- factor(rep(vec_cases, each = int_N_unique), levels = vec_cases)
-
-df_rate_sparse <- df_rate_sparse %>% 
-  filter(Case != "Naive")
 
 df_rate_sparse %>% 
   pivot_longer(cols = c(MSE, `Squared Bias`, Variance), 
@@ -277,7 +226,7 @@ df_rate_sparse %>%
   theme_bw() +
   scale_shape_manual(values = c(3, 4, 16))
 
-ggsave("Results/Plots/Motivation/Sparse/mse_decomp.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Sparse/mse_decomp.png", width = 30, height = 15, units = "cm")
 
 df_rate_sparse %>% 
   ggplot(aes(x = N, y = Rate, col = Case, shape = Case)) +
@@ -286,7 +235,7 @@ df_rate_sparse %>%
   labs(col = "", shape = "") +
   theme_bw()
 
-ggsave("Results/Plots/Motivation/Sparse/rate_mse.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Sparse/rate_mse.png", width = 30, height = 15, units = "cm")
 
 # Table with Rates
 df_rate_sparse %>% 
@@ -327,6 +276,19 @@ df_rate_sparse %>%
             out = "Results/Tables/Motivation/Sparse/sq_bias.tex", 
             rownames = TRUE)
 
+# Table with  Bias
+df_rate_sparse %>% 
+  select(N, `Mean Bias`, Case) %>% 
+  filter(!is.na(`Mean Bias`)) %>% 
+  pivot_wider(values_from = `Mean Bias`, names_from = N) %>% 
+  column_to_rownames("Case") %>% 
+  transform_scientific(int_digits) %>% 
+  stargazer(summary = FALSE, table.placement = "H", 
+            title = "Mean Bias of $ \\hat{\\theta}_0 $ (Sparse)",
+            label = "tab_mot_sparse_bias",
+            out = "Results/Tables/Motivation/Sparse/bias.tex", 
+            rownames = TRUE)
+
 # Table with Variance
 df_rate_sparse %>% 
   select(N, Variance, Case) %>% 
@@ -341,13 +303,11 @@ df_rate_sparse %>%
             rownames = TRUE)
 
 # Distribution Plot facetted by case
-list_dist_sparse_naive <- distribution(mcs_sparse_naive$Estimates, plot = FALSE)
 list_dist_sparse_non_orth <- distribution(mcs_sparse_non_orth$Estimates, plot = FALSE)
 list_dist_sparse_non_cf <- distribution(mcs_sparse_non_cf$Estimates, plot = FALSE)
 list_dist_sparse_dml <- distribution(mcs_sparse_dml$Estimates, plot = FALSE)
 
 df_parameter_sparse <- rbind(
-  list_dist_sparse_naive$data,
   list_dist_sparse_non_orth$data,
   list_dist_sparse_non_cf$data,
   list_dist_sparse_dml$data
@@ -358,11 +318,7 @@ df_parameter_sparse$Case <- factor(
   levels = vec_cases
 )
 
-df_parameter_sparse <- df_parameter_sparse %>% 
-  filter(Case != "Naive")
-
 df_normal_sparse <- rbind(
-  list_dist_sparse_naive$normality,
   list_dist_sparse_non_orth$normality,
   list_dist_sparse_non_cf$normality,
   list_dist_sparse_dml$normality
@@ -373,9 +329,6 @@ df_normal_sparse$Case <- factor(
   levels = vec_cases
 )
 
-df_normal_sparse <- df_normal_sparse %>% 
-  filter(Case != "Naive")
-
 ggplot(df_parameter_sparse) + 
   geom_histogram(aes(x = parameter_est, y = ..density..)) + 
   geom_line(aes(x = x, y = pdf), data = df_normal_sparse) + 
@@ -385,16 +338,14 @@ ggplot(df_parameter_sparse) +
   labs(x = TeX("$\\hat{\\theta}_0$"), y = "Density") +
   theme_bw()
 
-ggsave("Results/Plots/Motivation/Sparse/dist.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Sparse/dist.png", width = 30, height = 15, units = "cm")
 
 # Coverage Probabilities
-list_cov_prob_sparse_naive <- cov_prob(mcs_sparse_naive$Estimates, plot = FALSE)
 list_cov_prob_sparse_non_orth <- cov_prob(mcs_sparse_non_orth$Estimates, plot = FALSE)
 list_cov_prob_sparse_non_cf <- cov_prob(mcs_sparse_non_cf$Estimates, plot = FALSE)
 list_cov_prob_sparse_dml <- cov_prob(mcs_sparse_dml$Estimates, plot = FALSE)
 
 df_cov_prob_sparse <- rbind(
-  list_cov_prob_sparse_naive$data,
   list_cov_prob_sparse_non_orth$data,
   list_cov_prob_sparse_non_cf$data,
   list_cov_prob_sparse_dml$data
@@ -406,9 +357,6 @@ df_cov_prob_sparse$Case <- factor(
   levels = vec_cases
 )
 
-df_cov_prob_sparse <- df_cov_prob_sparse %>% 
-  filter(Case != "Naive")
-
 df_cov_prob_sparse %>% 
   ggplot(aes(x = N, y = `Cov. Prob.`, col = `Width of CI`)) + 
   geom_point(size = 2) +
@@ -419,57 +367,13 @@ df_cov_prob_sparse %>%
   scale_color_continuous(type = "viridis") + 
   facet_grid(Case ~ ., labeller = label_wrap_gen(width = 10), scales = "free")
 
-ggsave("Results/Plots/Motivation/Sparse/cov_prob.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Sparse/cov_prob.png", width = 30, height = 15, units = "cm")
 
 # Sine --------------------------------------------------------------------
 
-load("Results/Data/Final MCS Data/mcs_sine_naive.RData")
 load("Results/Data/Final MCS Data/mcs_sine_non_cf.RData")
 load("Results/Data/Final MCS Data/mcs_sine_non_orth.RData")
 load("Results/Data/Final MCS Data/mcs_sine_dml.RData")
-
-# Naive -------------------------------------------------------------------
-
-df_nuis_sine_naive <- desc_nuis(mcs_sine_naive$Measures) %>% 
-  arrange(Fun) %>% 
-  select(-Mle, -Variance) %>% 
-  rename("MSR. Test" = "Mean_msr_in", "MSR. Validation" = Mean_msr_val) %>% 
-  mutate(
-    Fun = case_when(
-      Fun == "ml_g" ~ "l(X)",
-      Fun == "ml_m" ~ "m(X)",
-      TRUE ~ NA_character_
-    )
-  )
-
-
-# Eta estimator doesn't overfit and is unbiased
-df_nuis_sine_naive %>% 
-  transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, table.placement = "!htb", 
-            out = "Results/Tables/Motivation/Sine/naive_eta.tex")
-
-# Look at Theta parameter directly
-
-list_rate_sine_naive <- mcs_sine_naive %>% 
-  pluck("Estimates") %>% 
-  mse() %>% 
-  estimate_rate(FALSE, FALSE, TRUE)
-
-df_rate_sine_naive <- list_rate_sine_naive$rate %>% 
-  select(-parameter_names)
-
-df_rate_sine_naive %>% 
-  transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
-            out = "Results/Tables/Motivation/Sine/naive_theta.tex")
-
-df_rate_desc_sine_naive <- list_rate_sine_naive$rate_desc
-
-df_rate_desc_sine_naive %>% 
-  transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
-            out = "Results/Tables/Motivation/Sine/naive_rate_theta.tex")
 
 # Non-Orthogonal Score ----------------------------------------------------
 
@@ -603,15 +507,12 @@ df_rate_desc_sine_dml %>%
 
 # Plot for Nuisance MSE between cases.
 df_nuis_sine <- rbind.data.frame(
-  df_nuis_sine_naive,
   df_nuis_sine_non_orth,
   df_nuis_sine_non_cf,
   df_nuis_sine_dml
 )
 
 df_nuis_sine$Case = rep(vec_cases, each = 2 * int_N_unique)
-
-df_nuis_sine <- df_nuis_sine[df_nuis_sine$Case != "Naive", ]
 
 df_nuis_sine %>% 
   ggplot(aes(x = N, col = Case)) + 
@@ -622,7 +523,7 @@ df_nuis_sine %>%
   theme_bw() + 
   scale_shape_manual(values = c(3, 4, 15, 16))
 
-ggsave("Results/Plots/Motivation/Sine/nuis_mse.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Sine/nuis_mse.png", width = 30, height = 15, units = "cm")
 
 # Table showing MSRs, MSE and Bias for l_0 and m_0
 df_nuis_sine_dml %>% 
@@ -649,30 +550,26 @@ df_nuis_sine_dml %>%
             out = "Results/Tables/Motivation/Sine/nuis_bias.tex",
             rownames = TRUE)
 
-df_nuis_sine %>% 
-  mutate(Difference = `MSR. Validation` - `MSR. Test`) %>% 
-  select(Case, N, Fun, Difference) %>% 
-  pivot_wider(values_from = Difference, names_from = N) %>% 
-  rename("Nuisance" = "Fun") %>% 
-  transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, table.placement = "H",
-            title = "Difference of Validation and Test Error Measure (Sine)",
-            label = "tab_mot_sine_nuis_diff_msrs",
-            out = "Results/Tables/Motivation/Sine/nuis_diff_msrs.tex",
-            rownames = FALSE)
+# df_nuis_sine %>% 
+#   mutate(Difference = `MSR. Validation` - `MSR. Test`) %>% 
+#   select(Case, N, Fun, Difference) %>% 
+#   pivot_wider(values_from = Difference, names_from = N) %>% 
+#   rename("Nuisance" = "Fun") %>% 
+#   transform_scientific(int_digits) %>% 
+#   stargazer(summary = FALSE, table.placement = "H",
+#             title = "Difference of Validation and Test Error Measure (Sine)",
+#             label = "tab_mot_sine_nuis_diff_msrs",
+#             out = "Results/Tables/Motivation/Sine/nuis_diff_msrs.tex",
+#             rownames = FALSE)
 
 # Plot showing MSE, Squared Bias and Variance for all cases
 df_rate_sine <- rbind(
-  df_rate_sine_naive,
   df_rate_sine_non_orth,
   df_rate_sine_non_cf,
   df_rate_sine_dml
 )
 
 df_rate_sine$Case <- factor(rep(vec_cases, each = int_N_unique), levels = vec_cases)
-
-df_rate_sine <- df_rate_sine %>% 
-  filter(Case != "Naive")
 
 df_rate_sine %>% 
   pivot_longer(cols = c(MSE, `Squared Bias`, Variance), 
@@ -686,7 +583,7 @@ df_rate_sine %>%
   theme_bw() +
   scale_shape_manual(values = c(3, 4, 16))
 
-ggsave("Results/Plots/Motivation/Sine/mse_decomp.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Sine/mse_decomp.png", width = 30, height = 15, units = "cm")
 
 df_rate_sine %>% 
   ggplot(aes(x = N, y = Rate, col = Case, shape = Case)) +
@@ -695,7 +592,7 @@ df_rate_sine %>%
   labs(col = "", shape = "") +
   theme_bw()
 
-ggsave("Results/Plots/Motivation/Sine/rate_mse.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Sine/rate_mse.png", width = 30, height = 15, units = "cm")
 
 # Table with Rates
 df_rate_sine %>% 
@@ -736,6 +633,19 @@ df_rate_sine %>%
             out = "Results/Tables/Motivation/Sine/sq_bias.tex", 
             rownames = TRUE)
 
+# Table with  Bias
+df_rate_sine %>% 
+  select(N, `Mean Bias`, Case) %>% 
+  filter(!is.na(`Mean Bias`)) %>% 
+  pivot_wider(values_from = `Mean Bias`, names_from = N) %>% 
+  column_to_rownames("Case") %>% 
+  transform_scientific(int_digits) %>% 
+  stargazer(summary = FALSE, table.placement = "H", 
+            title = "Mean Bias of $ \\hat{\\theta}_0 $ (Sine)",
+            label = "tab_mot_sine_bias",
+            out = "Results/Tables/Motivation/Sine/bias.tex", 
+            rownames = TRUE)
+
 # Table with Variance
 df_rate_sine %>% 
   select(N, Variance, Case) %>% 
@@ -750,13 +660,11 @@ df_rate_sine %>%
             rownames = TRUE)
 
 # Distribution Plot facetted by case
-list_dist_sine_naive <- distribution(mcs_sine_naive$Estimates, plot = FALSE)
 list_dist_sine_non_orth <- distribution(mcs_sine_non_orth$Estimates, plot = FALSE)
 list_dist_sine_non_cf <- distribution(mcs_sine_non_cf$Estimates, plot = FALSE)
 list_dist_sine_dml <- distribution(mcs_sine_dml$Estimates, plot = FALSE)
 
 df_parameter_sine <- rbind(
-  list_dist_sine_naive$data,
   list_dist_sine_non_orth$data,
   list_dist_sine_non_cf$data,
   list_dist_sine_dml$data
@@ -767,11 +675,7 @@ df_parameter_sine$Case <- factor(
   levels = vec_cases
 )
 
-df_parameter_sine <- df_parameter_sine %>% 
-  filter(Case != "Naive")
-
 df_normal_sine <- rbind(
-  list_dist_sine_naive$normality,
   list_dist_sine_non_orth$normality,
   list_dist_sine_non_cf$normality,
   list_dist_sine_dml$normality
@@ -782,9 +686,6 @@ df_normal_sine$Case <- factor(
   levels = vec_cases
 )
 
-df_normal_sine <- df_normal_sine %>% 
-  filter(Case != "Naive")
-
 ggplot(df_parameter_sine) + 
   geom_histogram(aes(x = parameter_est, y = ..density..)) + 
   geom_line(aes(x = x, y = pdf), data = df_normal_sine) + 
@@ -794,16 +695,14 @@ ggplot(df_parameter_sine) +
   labs(x = TeX("$\\hat{\\theta}_0$"), y = "Density") +
   theme_bw()
 
-ggsave("Results/Plots/Motivation/Sine/dist.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Sine/dist.png", width = 30, height = 15, units = "cm")
 
 # Coverage Probabilities
-list_cov_prob_sine_naive <- cov_prob(mcs_sine_naive$Estimates, plot = FALSE)
 list_cov_prob_sine_non_orth <- cov_prob(mcs_sine_non_orth$Estimates, plot = FALSE)
 list_cov_prob_sine_non_cf <- cov_prob(mcs_sine_non_cf$Estimates, plot = FALSE)
 list_cov_prob_sine_dml <- cov_prob(mcs_sine_dml$Estimates, plot = FALSE)
 
 df_cov_prob_sine <- rbind(
-  list_cov_prob_sine_naive$data,
   list_cov_prob_sine_non_orth$data,
   list_cov_prob_sine_non_cf$data,
   list_cov_prob_sine_dml$data
@@ -815,9 +714,6 @@ df_cov_prob_sine$Case <- factor(
   levels = vec_cases
 )
 
-df_cov_prob_sine <- df_cov_prob_sine %>% 
-  filter(Case != "Naive")
-
 df_cov_prob_sine %>% 
   ggplot(aes(x = N, y = `Cov. Prob.`, col = `Width of CI`)) + 
   geom_point(size = 2) +
@@ -828,56 +724,13 @@ df_cov_prob_sine %>%
   scale_color_continuous(type = "viridis") + 
   facet_grid(Case ~ ., labeller = label_wrap_gen(width = 10), scales = "free")
 
-ggsave("Results/Plots/Motivation/Sine/cov_prob.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Sine/cov_prob.png", width = 30, height = 15, units = "cm")
 
 # Inter --------------------------------------------------------------------
 
-load("Results/Data/Final MCS Data/mcs_inter_naive.RData")
 load("Results/Data/Final MCS Data/mcs_inter_non_cf.RData")
 load("Results/Data/Final MCS Data/mcs_inter_non_orth.RData")
 load("Results/Data/Final MCS Data/mcs_inter_dml.RData")
-
-# Naive -------------------------------------------------------------------
-
-df_nuis_inter_naive <- desc_nuis(mcs_inter_naive$Measures) %>% 
-  arrange(Fun) %>% 
-  select(-Mle, -Variance) %>% 
-  rename("MSR. Test" = "Mean_msr_in", "MSR. Validation" = Mean_msr_val) %>% 
-  mutate(
-    Fun = case_when(
-      Fun == "ml_g" ~ "l(X)",
-      Fun == "ml_m" ~ "m(X)",
-      TRUE ~ NA_character_
-    )
-  )
-
-# Eta estimator doesn't overfit and is unbiased
-df_nuis_inter_naive %>% 
-  transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, table.placement = "!htb", 
-            out = "Results/Tables/Motivation/Inter/naive_eta.tex")
-
-# Look at Theta parameter directly
-
-list_rate_inter_naive <- mcs_inter_naive %>% 
-  pluck("Estimates") %>% 
-  mse() %>% 
-  estimate_rate(FALSE, FALSE, TRUE)
-
-df_rate_inter_naive <- list_rate_inter_naive$rate %>% 
-  select(-parameter_names)
-
-df_rate_inter_naive %>% 
-  transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
-            out = "Results/Tables/Motivation/Inter/naive_theta.tex")
-
-df_rate_desc_inter_naive <- list_rate_inter_naive$rate_desc
-
-df_rate_desc_inter_naive %>% 
-  transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
-            out = "Results/Tables/Motivation/Inter/naive_rate_theta.tex")
 
 # Non-Orthogonal Score ----------------------------------------------------
 
@@ -1011,15 +864,12 @@ df_rate_desc_inter_dml %>%
 
 # Plot for Nuisance MSE between cases.
 df_nuis_inter <- rbind.data.frame(
-  df_nuis_inter_naive,
   df_nuis_inter_non_orth,
   df_nuis_inter_non_cf,
   df_nuis_inter_dml
 )
 
 df_nuis_inter$Case = rep(vec_cases, each = 2 * int_N_unique)
-
-df_nuis_inter <- df_nuis_inter[df_nuis_inter$Case != "Naive", ]
 
 df_nuis_inter %>% 
   ggplot(aes(x = N, col = Case)) + 
@@ -1030,7 +880,7 @@ df_nuis_inter %>%
   theme_bw() + 
   scale_shape_manual(values = c(3, 4, 15, 16))
 
-ggsave("Results/Plots/Motivation/Inter/nuis_mse.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Inter/nuis_mse.png", width = 30, height = 15, units = "cm")
 
 # Table showing MSRs, MSE and Bias for l_0 and m_0
 df_nuis_inter_dml %>% 
@@ -1057,30 +907,27 @@ df_nuis_inter_dml %>%
             out = "Results/Tables/Motivation/Inter/nuis_bias.tex",
             rownames = TRUE)
 
-df_nuis_inter %>% 
-  mutate(Difference = `MSR. Validation` - `MSR. Test`) %>% 
-  select(Case, N, Fun, Difference) %>% 
-  pivot_wider(values_from = Difference, names_from = N) %>% 
-  rename("Nuisance" = "Fun") %>% 
-  transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, table.placement = "H",
-            title = "Difference of Validation and Test Error Measure (Inter)",
-            label = "tab_mot_inter_nuis_diff_msrs",
-            out = "Results/Tables/Motivation/Inter/nuis_diff_msrs.tex",
-            rownames = FALSE)
+# df_nuis_inter %>% 
+#   filter(Case != "Only Orthogonal") %>% 
+#   mutate(Difference = `MSR. Validation` - `MSR. Test`) %>% 
+#   select(Case, N, Fun, Difference) %>% 
+#   pivot_wider(values_from = Difference, names_from = N) %>% 
+#   rename("Nuisance" = "Fun") %>% 
+#   transform_scientific(int_digits) %>% 
+#   stargazer(summary = FALSE, table.placement = "H",
+#             title = "Difference of Validation and Test Error Measure (Inter)",
+#             label = "tab_mot_inter_nuis_diff_msrs",
+#             out = "Results/Tables/Motivation/Inter/nuis_diff_msrs.tex",
+#             rownames = FALSE)
 
 # Plot showing MSE, Squared Bias and Variance for all cases
 df_rate_inter <- rbind(
-  df_rate_inter_naive,
   df_rate_inter_non_orth,
   df_rate_inter_non_cf,
   df_rate_inter_dml
 )
 
 df_rate_inter$Case <- factor(rep(vec_cases, each = int_N_unique), levels = vec_cases)
-
-df_rate_inter <- df_rate_inter %>% 
-  filter(Case != "Naive")
 
 df_rate_inter %>% 
   pivot_longer(cols = c(MSE, `Squared Bias`, Variance), 
@@ -1094,7 +941,7 @@ df_rate_inter %>%
   theme_bw() +
   scale_shape_manual(values = c(3, 4, 16))
 
-ggsave("Results/Plots/Motivation/Inter/mse_decomp.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Inter/mse_decomp.png", width = 30, height = 15, units = "cm")
 
 df_rate_inter %>% 
   ggplot(aes(x = N, y = Rate, col = Case, shape = Case)) +
@@ -1103,7 +950,7 @@ df_rate_inter %>%
   labs(col = "", shape = "") +
   theme_bw()
 
-ggsave("Results/Plots/Motivation/Inter/rate_mse.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Inter/rate_mse.png", width = 30, height = 15, units = "cm")
 
 # Table with Rates
 df_rate_inter %>% 
@@ -1144,6 +991,19 @@ df_rate_inter %>%
             out = "Results/Tables/Motivation/Inter/sq_bias.tex", 
             rownames = TRUE)
 
+# Table with  Bias
+df_rate_inter %>% 
+  select(N, `Mean Bias`, Case) %>% 
+  filter(!is.na(`Mean Bias`)) %>% 
+  pivot_wider(values_from = `Mean Bias`, names_from = N) %>% 
+  column_to_rownames("Case") %>% 
+  transform_scientific(int_digits) %>% 
+  stargazer(summary = FALSE, table.placement = "H", 
+            title = "Mean Bias of $ \\hat{\\theta}_0 $ (Interaction)",
+            label = "tab_mot_inter_bias",
+            out = "Results/Tables/Motivation/Inter/bias.tex", 
+            rownames = TRUE)
+
 # Table with Variance
 df_rate_inter %>% 
   select(N, Variance, Case) %>% 
@@ -1158,13 +1018,11 @@ df_rate_inter %>%
             rownames = TRUE)
 
 # Distribution Plot facetted by case
-list_dist_inter_naive <- distribution(mcs_inter_naive$Estimates, plot = FALSE)
 list_dist_inter_non_orth <- distribution(mcs_inter_non_orth$Estimates, plot = FALSE)
 list_dist_inter_non_cf <- distribution(mcs_inter_non_cf$Estimates, plot = FALSE)
 list_dist_inter_dml <- distribution(mcs_inter_dml$Estimates, plot = FALSE)
 
 df_parameter_inter <- rbind(
-  list_dist_inter_naive$data,
   list_dist_inter_non_orth$data,
   list_dist_inter_non_cf$data,
   list_dist_inter_dml$data
@@ -1175,11 +1033,7 @@ df_parameter_inter$Case <- factor(
   levels = vec_cases
 )
 
-df_parameter_inter <- df_parameter_inter %>% 
-  filter(Case != "Naive")
-
 df_normal_inter <- rbind(
-  list_dist_inter_naive$normality,
   list_dist_inter_non_orth$normality,
   list_dist_inter_non_cf$normality,
   list_dist_inter_dml$normality
@@ -1190,9 +1044,6 @@ df_normal_inter$Case <- factor(
   levels = vec_cases
 )
 
-df_normal_inter <- df_normal_inter %>% 
-  filter(Case != "Naive")
-
 ggplot(df_parameter_inter) + 
   geom_histogram(aes(x = parameter_est, y = ..density..)) + 
   geom_line(aes(x = x, y = pdf), data = df_normal_inter) + 
@@ -1202,16 +1053,14 @@ ggplot(df_parameter_inter) +
   labs(x = TeX("$\\hat{\\theta}_0$"), y = "Density") +
   theme_bw()
 
-ggsave("Results/Plots/Motivation/Inter/dist.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Inter/dist.png", width = 30, height = 15, units = "cm")
 
 # Coverage Probabilities
-list_cov_prob_inter_naive <- cov_prob(mcs_inter_naive$Estimates, plot = FALSE)
 list_cov_prob_inter_non_orth <- cov_prob(mcs_inter_non_orth$Estimates, plot = FALSE)
 list_cov_prob_inter_non_cf <- cov_prob(mcs_inter_non_cf$Estimates, plot = FALSE)
 list_cov_prob_inter_dml <- cov_prob(mcs_inter_dml$Estimates, plot = FALSE)
 
 df_cov_prob_inter <- rbind(
-  list_cov_prob_inter_naive$data,
   list_cov_prob_inter_non_orth$data,
   list_cov_prob_inter_non_cf$data,
   list_cov_prob_inter_dml$data
@@ -1223,9 +1072,6 @@ df_cov_prob_inter$Case <- factor(
   levels = vec_cases
 )
 
-df_cov_prob_inter <- df_cov_prob_inter %>% 
-  filter(Case != "Naive")
-
 df_cov_prob_inter %>% 
   ggplot(aes(x = N, y = `Cov. Prob.`, col = `Width of CI`)) + 
   geom_point(size = 2) +
@@ -1236,57 +1082,13 @@ df_cov_prob_inter %>%
   scale_color_continuous(type = "viridis") + 
   facet_grid(Case ~ ., labeller = label_wrap_gen(width = 10), scales = "free")
 
-ggsave("Results/Plots/Motivation/Inter/cov_prob.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Inter/cov_prob.png", width = 30, height = 15, units = "cm")
 
 # Neural --------------------------------------------------------------------
 
-load("Results/Data/Final MCS Data/mcs_neural_naive.RData")
 load("Results/Data/Final MCS Data/mcs_neural_non_cf.RData")
 load("Results/Data/Final MCS Data/mcs_neural_non_orth.RData")
 load("Results/Data/Final MCS Data/mcs_neural_dml.RData")
-
-# Naive -------------------------------------------------------------------
-
-df_nuis_neural_naive <- desc_nuis(mcs_neural_naive$Measures) %>% 
-  arrange(Fun) %>% 
-  select(-Mle, -Variance) %>% 
-  rename("MSR. Test" = "Mean_msr_in", "MSR. Validation" = Mean_msr_val) %>% 
-  mutate(
-    Fun = case_when(
-      Fun == "ml_g" ~ "l(X)",
-      Fun == "ml_m" ~ "m(X)",
-      TRUE ~ NA_character_
-    )
-  )
-
-
-# Eta estimator doesn't overfit and is unbiased
-df_nuis_neural_naive %>% 
-  transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, table.placement = "!htb", 
-            out = "Results/Tables/Motivation/Neural/naive_eta.tex")
-
-# Look at Theta parameter directly
-
-list_rate_neural_naive <- mcs_neural_naive %>% 
-  pluck("Estimates") %>% 
-  mse() %>% 
-  estimate_rate(FALSE, FALSE, TRUE)
-
-df_rate_neural_naive <- list_rate_neural_naive$rate %>% 
-  select(-parameter_names)
-
-df_rate_neural_naive %>% 
-  transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
-            out = "Results/Tables/Motivation/Neural/naive_theta.tex")
-
-df_rate_desc_neural_naive <- list_rate_neural_naive$rate_desc
-
-df_rate_desc_neural_naive %>% 
-  transform_scientific(int_digits) %>% 
-  stargazer(type = "latex", summary = FALSE, table.placement = "!htb",
-            out = "Results/Tables/Motivation/Neural/naive_rate_theta.tex")
 
 # Non-Orthogonal Score ----------------------------------------------------
 
@@ -1420,15 +1222,12 @@ df_rate_desc_neural_dml %>%
 
 # Plot for Nuisance MSE between cases.
 df_nuis_neural <- rbind.data.frame(
-  df_nuis_neural_naive,
   df_nuis_neural_non_orth,
   df_nuis_neural_non_cf,
   df_nuis_neural_dml
 )
 
 df_nuis_neural$Case = rep(vec_cases, each = 2 * int_N_unique)
-
-df_nuis_neural <- df_nuis_neural[df_nuis_neural$Case != "Naive", ]
 
 df_nuis_neural %>% 
   ggplot(aes(x = N, col = Case)) + 
@@ -1439,7 +1238,7 @@ df_nuis_neural %>%
   theme_bw() + 
   scale_shape_manual(values = c(3, 4, 15, 16))
 
-ggsave("Results/Plots/Motivation/Neural/nuis_mse.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Neural/nuis_mse.png", width = 30, height = 15, units = "cm")
 
 # Table showing MSRs, MSE and Bias for l_0 and m_0
 df_nuis_neural_dml %>% 
@@ -1466,30 +1265,26 @@ df_nuis_neural_dml %>%
             out = "Results/Tables/Motivation/Neural/nuis_bias.tex",
             rownames = TRUE)
 
-df_nuis_neural %>% 
-  mutate(Difference = `MSR. Validation` - `MSR. Test`) %>% 
-  select(Case, N, Fun, Difference) %>% 
-  pivot_wider(values_from = Difference, names_from = N) %>% 
-  rename("Nuisance" = "Fun") %>% 
-  transform_scientific(int_digits) %>% 
-  stargazer(summary = FALSE, table.placement = "H",
-            title = "Difference of Validation and Test Error Measure (Neural)",
-            label = "tab_mot_neural_nuis_diff_msrs",
-            out = "Results/Tables/Motivation/Neural/nuis_diff_msrs.tex",
-            rownames = FALSE)
+# df_nuis_neural_dml %>% 
+#   mutate(Difference = `MSR. Validation` - `MSR. Test`) %>% 
+#   select(Case, N, Fun, Difference) %>% 
+#   pivot_wider(values_from = Difference, names_from = N) %>% 
+#   rename("Nuisance" = "Fun") %>% 
+#   transform_scientific(int_digits) %>% 
+#   stargazer(summary = FALSE, table.placement = "H",
+#             title = "Difference of Validation and Test Error Measure (Neural)",
+#             label = "tab_mot_neural_nuis_diff_msrs",
+#             out = "Results/Tables/Motivation/Neural/nuis_diff_msrs.tex",
+#             rownames = FALSE)
 
 # Plot showing MSE, Squared Bias and Variance for all cases
 df_rate_neural <- rbind(
-  df_rate_neural_naive,
   df_rate_neural_non_orth,
   df_rate_neural_non_cf,
   df_rate_neural_dml
 )
 
 df_rate_neural$Case <- factor(rep(vec_cases, each = int_N_unique), levels = vec_cases)
-
-df_rate_neural <- df_rate_neural %>% 
-  filter(Case != "Naive")
 
 df_rate_neural %>% 
   pivot_longer(cols = c(MSE, `Squared Bias`, Variance), 
@@ -1503,7 +1298,7 @@ df_rate_neural %>%
   theme_bw() +
   scale_shape_manual(values = c(3, 4, 16))
 
-ggsave("Results/Plots/Motivation/Neural/mse_decomp.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Neural/mse_decomp.png", width = 30, height = 15, units = "cm")
 
 df_rate_neural %>% 
   ggplot(aes(x = N, y = Rate, col = Case, shape = Case)) +
@@ -1512,7 +1307,7 @@ df_rate_neural %>%
   labs(col = "", shape = "") +
   theme_bw()
 
-ggsave("Results/Plots/Motivation/Neural/rate_mse.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Neural/rate_mse.png", width = 30, height = 15, units = "cm")
 
 # Table with Rates
 df_rate_neural %>% 
@@ -1553,6 +1348,19 @@ df_rate_neural %>%
             out = "Results/Tables/Motivation/Neural/sq_bias.tex", 
             rownames = TRUE)
 
+# Table with  Bias
+df_rate_neural %>% 
+  select(N, `Mean Bias`, Case) %>% 
+  filter(!is.na(`Mean Bias`)) %>% 
+  pivot_wider(values_from = `Mean Bias`, names_from = N) %>% 
+  column_to_rownames("Case") %>% 
+  transform_scientific(int_digits) %>% 
+  stargazer(summary = FALSE, table.placement = "H", 
+            title = "Mean Bias of $ \\hat{\\theta}_0 $ (Neural Network)",
+            label = "tab_mot_neural_bias",
+            out = "Results/Tables/Motivation/Neural/bias.tex", 
+            rownames = TRUE)
+
 # Table with Variance
 df_rate_neural %>% 
   select(N, Variance, Case) %>% 
@@ -1567,13 +1375,11 @@ df_rate_neural %>%
             rownames = TRUE)
 
 # Distribution Plot facetted by case
-list_dist_neural_naive <- distribution(mcs_neural_naive$Estimates, plot = FALSE)
 list_dist_neural_non_orth <- distribution(mcs_neural_non_orth$Estimates, plot = FALSE)
 list_dist_neural_non_cf <- distribution(mcs_neural_non_cf$Estimates, plot = FALSE)
 list_dist_neural_dml <- distribution(mcs_neural_dml$Estimates, plot = FALSE)
 
 df_parameter_neural <- rbind(
-  list_dist_neural_naive$data,
   list_dist_neural_non_orth$data,
   list_dist_neural_non_cf$data,
   list_dist_neural_dml$data
@@ -1584,11 +1390,7 @@ df_parameter_neural$Case <- factor(
   levels = vec_cases
 )
 
-df_parameter_neural <- df_parameter_neural %>% 
-  filter(Case != "Naive")
-
 df_normal_neural <- rbind(
-  list_dist_neural_naive$normality,
   list_dist_neural_non_orth$normality,
   list_dist_neural_non_cf$normality,
   list_dist_neural_dml$normality
@@ -1599,9 +1401,6 @@ df_normal_neural$Case <- factor(
   levels = vec_cases
 )
 
-df_normal_neural <- df_normal_neural %>% 
-  filter(Case != "Naive")
-
 ggplot(df_parameter_neural) + 
   geom_histogram(aes(x = parameter_est, y = ..density..)) + 
   geom_line(aes(x = x, y = pdf), data = df_normal_neural) + 
@@ -1611,16 +1410,14 @@ ggplot(df_parameter_neural) +
   labs(x = TeX("$\\hat{\\theta}_0$"), y = "Density") +
   theme_bw()
 
-ggsave("Results/Plots/Motivation/Neural/dist.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Neural/dist.png", width = 30, height = 15, units = "cm")
 
 # Coverage Probabilities
-list_cov_prob_neural_naive <- cov_prob(mcs_neural_naive$Estimates, plot = FALSE)
 list_cov_prob_neural_non_orth <- cov_prob(mcs_neural_non_orth$Estimates, plot = FALSE)
 list_cov_prob_neural_non_cf <- cov_prob(mcs_neural_non_cf$Estimates, plot = FALSE)
 list_cov_prob_neural_dml <- cov_prob(mcs_neural_dml$Estimates, plot = FALSE)
 
 df_cov_prob_neural <- rbind(
-  list_cov_prob_neural_naive$data,
   list_cov_prob_neural_non_orth$data,
   list_cov_prob_neural_non_cf$data,
   list_cov_prob_neural_dml$data
@@ -1632,9 +1429,6 @@ df_cov_prob_neural$Case <- factor(
   levels = vec_cases
 )
 
-df_cov_prob_neural <- df_cov_prob_neural %>% 
-  filter(Case != "Naive")
-
 df_cov_prob_neural %>% 
   ggplot(aes(x = N, y = `Cov. Prob.`, col = `Width of CI`)) + 
   geom_point(size = 2) +
@@ -1645,7 +1439,7 @@ df_cov_prob_neural %>%
   scale_color_continuous(type = "viridis") + 
   facet_grid(Case ~ ., labeller = label_wrap_gen(width = 10), scales = "free")
 
-ggsave("Results/Plots/Motivation/Neural/cov_prob.png", scale = dbl_scale)
+ggsave("Results/Plots/Motivation/Neural/cov_prob.png", width = 30, height = 15, units = "cm")
 
 
 # Joint Analysis of All Functions -----------------------------------------

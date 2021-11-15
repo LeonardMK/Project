@@ -68,7 +68,7 @@ mse <- function(
     filter(N %in% vec_N, Sample %in% Samples) %>% 
     mutate(
       sq_err = (parameter - parameter_est) ^ 2,
-      bias = parameter - parameter_est
+      bias = parameter_est - parameter
     )
   
   if (length(vec_N) > 1) {

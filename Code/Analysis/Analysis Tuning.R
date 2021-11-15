@@ -127,6 +127,18 @@ df_nuis_sparse_l_0 %>%
             rownames = FALSE
             )
 
+df_nuis_sparse_l_0 %>% 
+  select(N, MLE, `MSR. Validation`, Case) %>% 
+  transform_scientific(int_digits) %>% 
+  pivot_wider(names_from = N, values_from = `MSR. Validation`) %>% 
+  arrange(MLE, Case) %>% 
+  stargazer(summary = FALSE, table.placement = "H",
+            title = "Prediction Error of $ l_0(X) $ by $ N $ (Sparse)",
+            label = "tab_tune_sparse_val_err_nuis_l_0",
+            out = "Results/Tables/Tuning/Sparse/val_err_nuis_l_0.tex",
+            rownames = FALSE
+            )
+
 df_nuis_sparse_m_0 %>% 
   select(N, MLE, MSE, Case) %>% 
   transform_scientific(int_digits) %>% 
@@ -151,27 +163,35 @@ df_nuis_sparse_m_0 %>%
             rownames = FALSE
             )
 
+df_nuis_sparse_m_0 %>% 
+  select(N, MLE, `MSR. Validation`, Case) %>% 
+  transform_scientific(int_digits) %>% 
+  pivot_wider(names_from = N, values_from = `MSR. Validation`) %>% 
+  arrange(MLE, Case) %>% 
+  stargazer(summary = FALSE, table.placement = "H",
+            title = "Prediction Error of $ m_0(X) $ by $ N $ (Sparse)",
+            label = "tab_tune_sparse_val_err_nuis_m_0",
+            out = "Results/Tables/Tuning/Sparse/val_err_nuis_m_0.tex",
+            rownames = FALSE
+  )
+
 df_nuis_sparse$Case <- factor(df_nuis_sparse$Case, levels = vec_cases)
 df_nuis_sparse$Fun <- factor(df_nuis_sparse$Fun, labels = c(TeX("$ l_0(X) $"), TeX("$ m_0(X) $")))
 
 df_nuis_sparse %>% 
-  mutate(
-    Upper = MSE + qnorm(0.975) * Sd_mse,
-    Lower = MSE + qnorm(0.025) * Sd_mse
-  ) %>% 
-  mutate(Lower = if_else(Lower < 0, 0, Lower)) %>% 
   ggplot(aes(x = N, col = Case)) + 
-  geom_point(aes(y = MSE), size = 1.5) + 
-  geom_errorbar(aes(ymin = Lower, ymax = Upper), width = 0.2, alpha = 0.5) +
-  geom_line(aes(y = MSE), size = 1) +
+  geom_point(aes(y = `MSR. Validation`, shape = "MSR. Validation"), size = 1.5) + 
+  geom_line(aes(y = `MSR. Validation`, lty = "MSR. Validation"), size = 1) +
+  geom_point(aes(y = MSE, shape = "MSE"), size = 1.5) + 
+  geom_line(aes(y = MSE, lty = "MSE"), size = 1) +
   facet_wrap(Fun ~ MLE, 
              scales = "free", 
              labeller = labeller(Fun =label_parsed), 
              nrow = 2) + 
-  labs(y = "", col = "") + 
+  labs(y = "", col = "", shape = "", lty = "") + 
   theme_bw()
 
-ggsave("Results/Plots/Tuning/Sparse/nuis_mse.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Sparse/nuis_mse.png", width = 30, height = 15, units = "cm")
 
 # Plot showing MSE, Squared Bias and Variance for all cases
 df_rate_sparse_not$Case <- "Untuned"
@@ -194,7 +214,7 @@ df_rate_sparse %>%
   theme_bw() + 
   scale_linetype_manual(values = c("solid", "dashed", "dotted"))
 
-ggsave("Results/Plots/Tuning/Sparse/mse_decomp.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Sparse/mse_decomp.png", width = 30, height = 15, units = "cm")
 
 df_rate_sparse %>% 
   ggplot(aes(x = N, y = Rate, col = Case)) +
@@ -204,7 +224,7 @@ df_rate_sparse %>%
   theme_bw() + 
   facet_grid(~ Algorithms)
 
-ggsave("Results/Plots/Tuning/Sparse/rate_mse.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Sparse/rate_mse.png", width = 30, height = 15, units = "cm")
 
 # Table with Rates
 df_rate_sparse %>% 
@@ -322,7 +342,7 @@ ggplot(df_parameter_sparse) +
   labs(x = TeX("$\\hat{\\theta}_0$"), y = "Density", col = "", fill = "") +
   theme_bw()
 
-ggsave("Results/Plots/Tuning/Sparse/dist.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Sparse/dist.png", width = 30, height = 15, units = "cm")
 
 # Coverage Probabilities
 list_cov_prob_sparse_not <- cov_prob(mcs_sparse_not$Estimates, plot = FALSE, by = "Algorithms")
@@ -351,7 +371,7 @@ df_cov_prob_sparse %>%
   scale_linetype_manual(values = c("solid", "twodash")) +
   facet_grid(~ Algorithms, scales = "free")
 
-ggsave("Results/Plots/Tuning/Sparse/cov_prob.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Sparse/cov_prob.png", width = 30, height = 15, units = "cm")
 
 # Sine --------------------------------------------------------------------
 
@@ -457,6 +477,18 @@ df_nuis_sine_l_0 %>%
             rownames = FALSE
   )
 
+df_nuis_sine_l_0 %>% 
+  select(N, MLE, `MSR. Validation`, Case) %>% 
+  transform_scientific(int_digits) %>% 
+  pivot_wider(names_from = N, values_from = `MSR. Validation`) %>% 
+  arrange(MLE, Case) %>% 
+  stargazer(summary = FALSE, table.placement = "H",
+            title = "Prediction Error of $ l_0(X) $ by $ N $ (Sine)",
+            label = "tab_tune_sine_val_err_nuis_l_0",
+            out = "Results/Tables/Tuning/Sine/val_err_nuis_l_0.tex",
+            rownames = FALSE
+  )
+
 df_nuis_sine_m_0 %>% 
   select(N, MLE, MSE, Case) %>% 
   transform_scientific(int_digits) %>% 
@@ -481,27 +513,35 @@ df_nuis_sine_m_0 %>%
             rownames = FALSE
   )
 
+df_nuis_sine_m_0 %>% 
+  select(N, MLE, `MSR. Validation`, Case) %>% 
+  transform_scientific(int_digits) %>% 
+  pivot_wider(names_from = N, values_from = `MSR. Validation`) %>% 
+  arrange(MLE, Case) %>% 
+  stargazer(summary = FALSE, table.placement = "H",
+            title = "Prediction Error of $ m_0(X) $ by $ N $ (Sine)",
+            label = "tab_tune_sine_val_err_nuis_m_0",
+            out = "Results/Tables/Tuning/Sine/val_err_nuis_m_0.tex",
+            rownames = FALSE
+  )
+
 df_nuis_sine$Case <- factor(df_nuis_sine$Case, levels = vec_cases)
 df_nuis_sine$Fun <- factor(df_nuis_sine$Fun, labels = c(TeX("$ l_0(X) $"), TeX("$ m_0(X) $")))
 
 df_nuis_sine %>% 
-  mutate(
-    Upper = MSE + qnorm(0.975) * Sd_mse,
-    Lower = MSE + qnorm(0.025) * Sd_mse
-  ) %>% 
-  mutate(Lower = if_else(Lower < 0, 0, Lower)) %>% 
   ggplot(aes(x = N, col = Case)) + 
-  geom_point(aes(y = MSE), size = 1.5) + 
-  geom_errorbar(aes(ymin = Lower, ymax = Upper), width = 0.2, alpha = 0.5) +
-  geom_line(aes(y = MSE), size = 1) +
+  geom_point(aes(y = `MSR. Validation`, shape = "MSR. Validation"), size = 1.5) + 
+  geom_line(aes(y = `MSR. Validation`, lty = "MSR. Validation"), size = 1) +
+  geom_point(aes(y = MSE, shape = "MSE"), size = 1.5) + 
+  geom_line(aes(y = MSE, lty = "MSE"), size = 1) +
   facet_wrap(Fun ~ MLE, 
              scales = "free", 
-             labeller = labeller(Fun =label_parsed),
+             labeller = labeller(Fun =label_parsed), 
              nrow = 2) + 
-  labs(y = "", col = "") + 
+  labs(y = "", col = "", shape = "", lty = "") + 
   theme_bw()
 
-ggsave("Results/Plots/Tuning/Sine/nuis_mse.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Sine/nuis_mse.png", width = 30, height = 15, units = "cm")
 
 # Plot showing MSE, Squared Bias and Variance for all cases
 df_rate_sine_not$Case <- "Untuned"
@@ -524,7 +564,7 @@ df_rate_sine %>%
   theme_bw() + 
   scale_linetype_manual(values = c("solid", "dashed", "dotted"))
 
-ggsave("Results/Plots/Tuning/Sine/mse_decomp.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Sine/mse_decomp.png", width = 30, height = 15, units = "cm")
 
 df_rate_sine %>% 
   ggplot(aes(x = N, y = Rate, col = Case)) +
@@ -534,7 +574,7 @@ df_rate_sine %>%
   theme_bw() + 
   facet_grid(~ Algorithms)
 
-ggsave("Results/Plots/Tuning/Sine/rate_mse.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Sine/rate_mse.png", width = 30, height = 15, units = "cm")
 
 # Table with Rates
 df_rate_sine %>% 
@@ -652,7 +692,7 @@ ggplot(df_parameter_sine) +
   labs(x = TeX("$\\hat{\\theta}_0$"), y = "Density", col = "", fill = "") +
   theme_bw()
 
-ggsave("Results/Plots/Tuning/Sine/dist.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Sine/dist.png", width = 30, height = 15, units = "cm")
 
 # Coverage Probabilities
 list_cov_prob_sine_not <- cov_prob(mcs_sine_not$Estimates, plot = FALSE, by = "Algorithms")
@@ -681,7 +721,7 @@ df_cov_prob_sine %>%
   scale_linetype_manual(values = c("solid", "twodash")) +
   facet_grid(~ Algorithms, scales = "free")
 
-ggsave("Results/Plots/Tuning/Sine/cov_prob.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Sine/cov_prob.png", width = 30, height = 15, units = "cm")
 
 # Inter --------------------------------------------------------------------
 
@@ -787,6 +827,18 @@ df_nuis_inter_l_0 %>%
             rownames = FALSE
   )
 
+df_nuis_inter_l_0 %>% 
+  select(N, MLE, `MSR. Validation`, Case) %>% 
+  transform_scientific(int_digits) %>% 
+  pivot_wider(names_from = N, values_from = `MSR. Validation`) %>% 
+  arrange(MLE, Case) %>% 
+  stargazer(summary = FALSE, table.placement = "H",
+            title = "Prediction Error of $ l_0(X) $ by $ N $ (Interaction)",
+            label = "tab_tune_inter_val_err_nuis_l_0",
+            out = "Results/Tables/Tuning/Inter/val_err_nuis_l_0.tex",
+            rownames = FALSE
+  )
+
 df_nuis_inter_m_0 %>% 
   select(N, MLE, MSE, Case) %>% 
   transform_scientific(int_digits) %>% 
@@ -811,27 +863,36 @@ df_nuis_inter_m_0 %>%
             rownames = FALSE
   )
 
+df_nuis_inter_m_0 %>% 
+  select(N, MLE, `MSR. Validation`, Case) %>% 
+  transform_scientific(int_digits) %>% 
+  pivot_wider(names_from = N, values_from = `MSR. Validation`) %>% 
+  arrange(MLE, Case) %>% 
+  stargazer(summary = FALSE, table.placement = "H",
+            title = "Prediction Error of $ m_0(X) $ by $ N $ (Interaction)",
+            label = "tab_tune_inter_val_err_nuis_m_0",
+            out = "Results/Tables/Tuning/Inter/val_err_nuis_m_0.tex",
+            rownames = FALSE
+  )
+
 df_nuis_inter$Case <- factor(df_nuis_inter$Case, levels = vec_cases)
 df_nuis_inter$Fun <- factor(df_nuis_inter$Fun, labels = c(TeX("$ l_0(X) $"), TeX("$ m_0(X) $")))
 
 df_nuis_inter %>% 
-  mutate(
-    Upper = MSE + qnorm(0.975) * Sd_mse,
-    Lower = MSE + qnorm(0.025) * Sd_mse
-  ) %>%
-  mutate(Lower = if_else(Lower < 0, 0, Lower)) %>% 
   ggplot(aes(x = N, col = Case)) + 
-  geom_point(aes(y = MSE), size = 1.5) + 
-  geom_errorbar(aes(ymin = Lower, ymax = Upper), width = 0.2, alpha = 0.5) +
-  geom_line(aes(y = MSE), size = 1) +
+  geom_point(aes(y = `MSR. Validation`, shape = "MSR. Validation"), size = 1.5) + 
+  geom_line(aes(y = `MSR. Validation`, lty = "MSR. Validation"), size = 1) +
+  geom_point(aes(y = MSE, shape = "MSE"), size = 1.5) + 
+  geom_line(aes(y = MSE, lty = "MSE"), size = 1) +
   facet_wrap(Fun ~ MLE, 
              scales = "free", 
-             labeller = labeller(Fun =label_parsed),
+             labeller = labeller(Fun =label_parsed), 
              nrow = 2) + 
-  labs(y = "", col = "") + 
+  labs(y = "", col = "", shape = "", lty = "") + 
   theme_bw()
 
-ggsave("Results/Plots/Tuning/Inter/nuis_mse.png", scale = dbl_scale)
+
+ggsave("Results/Plots/Tuning/Inter/nuis_mse.png", width = 30, height = 15, units = "cm")
 
 # Plot showing MSE, Squared Bias and Variance for all cases
 df_rate_inter_not$Case <- "Untuned"
@@ -854,7 +915,7 @@ df_rate_inter %>%
   theme_bw() + 
   scale_linetype_manual(values = c("solid", "dashed", "dotted"))
 
-ggsave("Results/Plots/Tuning/Inter/mse_decomp.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Inter/mse_decomp.png", width = 30, height = 15, units = "cm")
 
 df_rate_inter %>% 
   ggplot(aes(x = N, y = Rate, col = Case)) +
@@ -864,7 +925,7 @@ df_rate_inter %>%
   theme_bw() + 
   facet_grid(~ Algorithms)
 
-ggsave("Results/Plots/Tuning/Inter/rate_mse.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Inter/rate_mse.png", width = 30, height = 15, units = "cm")
 
 # Table with Rates
 df_rate_inter %>% 
@@ -982,7 +1043,7 @@ ggplot(df_parameter_inter) +
   labs(x = TeX("$\\hat{\\theta}_0$"), y = "Density", col = "", fill = "") +
   theme_bw()
 
-ggsave("Results/Plots/Tuning/Inter/dist.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Inter/dist.png", width = 30, height = 15, units = "cm")
 
 # Coverage Probabilities
 list_cov_prob_inter_not <- cov_prob(mcs_inter_not$Estimates, plot = FALSE, by = "Algorithms")
@@ -1011,7 +1072,7 @@ df_cov_prob_inter %>%
   scale_linetype_manual(values = c("solid", "twodash")) +
   facet_grid(~ Algorithms, scales = "free")
 
-ggsave("Results/Plots/Tuning/Inter/cov_prob.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Inter/cov_prob.png", width = 30, height = 15, units = "cm")
 
 # Neural --------------------------------------------------------------------
 
@@ -1117,6 +1178,18 @@ df_nuis_neural_l_0 %>%
             rownames = FALSE
   )
 
+df_nuis_neural_l_0 %>% 
+  select(N, MLE, `MSR. Validation`, Case) %>% 
+  transform_scientific(int_digits) %>% 
+  pivot_wider(names_from = N, values_from = `MSR. Validation`) %>% 
+  arrange(MLE, Case) %>% 
+  stargazer(summary = FALSE, table.placement = "H",
+            title = "Prediction Error of $ l_0(X) $ by $ N $ (Neural Network)",
+            label = "tab_tune_neural_val_err_nuis_l_0",
+            out = "Results/Tables/Tuning/Neural/val_err_nuis_l_0.tex",
+            rownames = FALSE
+  )
+
 df_nuis_neural_m_0 %>% 
   select(N, MLE, MSE, Case) %>% 
   transform_scientific(int_digits) %>% 
@@ -1141,27 +1214,35 @@ df_nuis_neural_m_0 %>%
             rownames = FALSE
   )
 
+df_nuis_neural_m_0 %>% 
+  select(N, MLE, `MSR. Validation`, Case) %>% 
+  transform_scientific(int_digits) %>% 
+  pivot_wider(names_from = N, values_from = `MSR. Validation`) %>% 
+  arrange(MLE, Case) %>% 
+  stargazer(summary = FALSE, table.placement = "H",
+            title = "Prediction Error of $ m_0(X) $ by $ N $ (Neural Network)",
+            label = "tab_tune_neural_val_err_nuis_m_0",
+            out = "Results/Tables/Tuning/Neural/val_err_nuis_m_0.tex",
+            rownames = FALSE
+  )
+
 df_nuis_neural$Case <- factor(df_nuis_neural$Case, levels = vec_cases)
 df_nuis_neural$Fun <- factor(df_nuis_neural$Fun, labels = c(TeX("$ l_0(X) $"), TeX("$ m_0(X) $")))
 
 df_nuis_neural %>% 
-  mutate(
-    Upper = MSE + qnorm(0.975) * Sd_mse,
-    Lower = MSE + qnorm(0.025) * Sd_mse
-  ) %>%
-  mutate(Lower = if_else(Lower < 0, 0, Lower)) %>% 
   ggplot(aes(x = N, col = Case)) + 
-  geom_point(aes(y = MSE), size = 1.5) + 
-  geom_errorbar(aes(ymin = Lower, ymax = Upper), width = 0.2, alpha = 0.5) +
-  geom_line(aes(y = MSE), size = 1) +
+  geom_point(aes(y = `MSR. Validation`, shape = "MSR. Validation"), size = 1.5) + 
+  geom_line(aes(y = `MSR. Validation`, lty = "MSR. Validation"), size = 1) +
+  geom_point(aes(y = MSE, shape = "MSE"), size = 1.5) + 
+  geom_line(aes(y = MSE, lty = "MSE"), size = 1) +
   facet_wrap(Fun ~ MLE, 
              scales = "free", 
-             labeller = labeller(Fun =label_parsed),
+             labeller = labeller(Fun =label_parsed), 
              nrow = 2) + 
-  labs(y = "", col = "") + 
+  labs(y = "", col = "", shape = "", lty = "") + 
   theme_bw()
 
-ggsave("Results/Plots/Tuning/Neural/nuis_mse.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Neural/nuis_mse.png", width = 30, height = 15, units = "cm")
 
 # Plot showing MSE, Squared Bias and Variance for all cases
 df_rate_neural_not$Case <- "Untuned"
@@ -1184,7 +1265,7 @@ df_rate_neural %>%
   theme_bw() + 
   scale_linetype_manual(values = c("solid", "dashed", "dotted"))
 
-ggsave("Results/Plots/Tuning/Neural/mse_decomp.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Neural/mse_decomp.png", width = 30, height = 15, units = "cm")
 
 df_rate_neural %>% 
   ggplot(aes(x = N, y = Rate, col = Case)) +
@@ -1194,7 +1275,7 @@ df_rate_neural %>%
   theme_bw() + 
   facet_grid(~ Algorithms)
 
-ggsave("Results/Plots/Tuning/Neural/rate_mse.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Neural/rate_mse.png", width = 30, height = 15, units = "cm")
 
 # Table with Rates
 df_rate_neural %>% 
@@ -1311,7 +1392,7 @@ ggplot(df_parameter_neural) +
   labs(x = TeX("$\\hat{\\theta}_0$"), y = "Density", col = "", fill = "") +
   theme_bw()
 
-ggsave("Results/Plots/Tuning/Neural/dist.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Neural/dist.png", width = 30, height = 15, units = "cm")
 
 # Coverage Probabilities
 list_cov_prob_neural_not <- cov_prob(mcs_neural_not$Estimates, plot = FALSE, by = "Algorithms")
@@ -1340,59 +1421,92 @@ df_cov_prob_neural %>%
   scale_linetype_manual(values = c("solid", "twodash")) +
   facet_grid(~ Algorithms, scales = "free")
 
-ggsave("Results/Plots/Tuning/Neural/cov_prob.png", scale = dbl_scale)
+ggsave("Results/Plots/Tuning/Neural/cov_prob.png", width = 30, height = 15, units = "cm")
 
 # Rates of Convergence ----------------------------------------------------
 
-df_rate_sparse_n_net <- df_rate_sparse %>% 
-  filter(Algorithms == "N-Net") %>% 
+df_rate_sparse_bst_msr <- df_rate_sparse %>% 
+  filter(Algorithms == "Best Measure") %>% 
   group_by(Case) %>% 
   select(N, Rate, Case) %>% 
   drop_na() %>% 
   pivot_wider(names_from = c(N), values_from = Rate)
 
-df_rate_sine_n_net <- df_rate_sine %>% 
-  filter(Algorithms == "N-Net") %>% 
+df_rate_sine_bst_msr <- df_rate_sine %>% 
+  filter(Algorithms == "Best Measure") %>% 
   group_by(Case) %>% 
   select(N, Rate, Case) %>% 
   drop_na() %>% 
   pivot_wider(names_from = c(N), values_from = Rate)
 
-df_rate_inter_n_net <- df_rate_inter %>% 
-  filter(Algorithms == "N-Net") %>% 
+df_rate_inter_bst_msr <- df_rate_inter %>% 
+  filter(Algorithms == "Best Measure") %>% 
   group_by(Case) %>% 
   select(N, Rate, Case) %>% 
   drop_na() %>% 
   pivot_wider(names_from = c(N), values_from = Rate)
 
-df_rate_neural_n_net <- df_rate_neural %>% 
-  filter(Algorithms == "N-Net") %>% 
+df_rate_neural_bst_msr <- df_rate_neural %>% 
+  filter(Algorithms == "Best Measure") %>% 
   group_by(Case) %>% 
   select(N, Rate, Case) %>% 
   drop_na() %>% 
   pivot_wider(names_from = c(N), values_from = Rate)
 
-df_rate_n_net <- rbind(
-  df_rate_sparse_n_net,
-  df_rate_sine_n_net,
-  df_rate_inter_n_net,
-  df_rate_neural_n_net
+df_rate_bst_msr <- rbind(
+  df_rate_sparse_bst_msr,
+  df_rate_sine_bst_msr,
+  df_rate_inter_bst_msr,
+  df_rate_neural_bst_msr
 )
 
-df_rate_n_net$`Mean Rate` <- rowMeans(df_rate_n_net[, -1])
-df_rate_n_net$Nuisance <- rep(
+df_rate_bst_msr$`Mean Rate` <- rowMeans(df_rate_bst_msr[, -1])
+df_rate_bst_msr$Nuisance <- rep(
   c("Sparse", "Sine", "Interaction", "Neural Network"),
   each = length(vec_cases)
   )
 
-df_rate_n_net %>% 
+df_rate_bst_msr %>% 
   transform_scientific(int_digits) %>% 
   select(Nuisance, Case, `100`, `400`, `Mean Rate`) %>% 
   mutate(Case = as.character(Case)) %>% 
   stargazer(summary = FALSE, 
             table.placement = "H",
-            out = "Results/Tables/Tuning/rates_n_net.tex",
-            title = "Estimated $ N ^ {-r} $ for MLE N-Net",
-            label = "tab_tune_rate_n_net",
+            out = "Results/Tables/Tuning/rates_bst_msr.tex",
+            title = "Estimated $ N ^ {-r} $ for MLE Best Measure",
+            label = "tab_tune_rate_bst_msr",
             rownames = FALSE
             )
+
+df_rate <- rbind(
+  df_rate_sparse,
+  df_rate_sine,
+  df_rate_inter,
+  df_rate_neural
+) %>% 
+  filter(N != 50) %>% 
+  mutate(N = factor(N, levels = c(100, 400, "Mean")))
+
+vec_dpgs <- c("Sparse Linear", "Sine", "Interaction", "Neural-Network")
+df_rate$`Nuisance Parameter` <- factor(
+  x = rep(vec_dpgs, each = nrow(df_rate) / 4),
+  levels = vec_dpgs
+  )
+
+df_rate_mean <- df_rate %>% 
+  group_by(Algorithms, `Nuisance Parameter`, Case) %>% 
+  summarise(Rate = mean(Rate, na.rm = TRUE)) %>% 
+  mutate(N = "Mean") %>% 
+  ungroup()
+
+df_rate <- df_rate %>% 
+  select(Algorithms, `Nuisance Parameter`, Case, Rate, N) %>% 
+  rbind(df_rate_mean)
+
+df_rate %>% 
+  ggplot(aes(x = N, y = Rate, col = Algorithms, shape = Case)) + 
+  geom_point(size = 1.5) + 
+  facet_grid(~ `Nuisance Parameter`) +
+  theme_bw()
+
+ggsave("Results/Plots/Tuning/rate_theta_mse.png", width = 30, height = 15, units = "cm")
